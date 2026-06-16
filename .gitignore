@@ -1,0 +1,29 @@
+# Temporary and generated working files
+tmp/
+*.pyc
+__pycache__/
+
+# Local installers and downloaded binaries
+*.exe
+artifacts/github-mcp-server-linux-amd64
+
+# Generated render/cache outputs
+tmp/pdfs/
+artifacts/*_before_cleanup.png
+artifacts/current_inapp_biology_page.png
+artifacts/cursor_mcp_smoke_*.json
+artifacts/rl_hw2_solution.md
+artifacts/*.png
+artifacts/*.pdf
+artifacts/*.zip
+artifacts/强化学习作业2_*
+
+# Machine-specific workflow logs
+docs/project-plan-log.md
+docs/experiment-log.md
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
