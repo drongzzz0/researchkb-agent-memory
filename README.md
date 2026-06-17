@@ -1,365 +1,388 @@
-# Obsidian / ResearchKB Research Agent Memory
+# ResearchKB Agent Memory Workflow
 
-这套仓库记录的是一个本机科研工作流，不是单纯的 Obsidian 笔记库，也不是几个零散脚本。
+Turn papers, experiment outputs, and failure cases into reusable memory for AI research agents.
 
-目标是把 **论文库、实验结果、失败经验、Codex/Claude/Cursor 的工作过程** 连成一个可持续复用的 `research agent memory`：以后做 KV-cache reuse 相关研究时，AI 助手不是只靠当前聊天上下文，而是能自动回到本地知识库里找论文证据、历史失败、近期实验结果和下一步计划。
+This repository is a starter workflow for connecting a local research knowledge base with tools such as Codex, Claude Code, Cursor, Obsidian, and Zotero. The goal is not to build another note-taking vault. The goal is to make research agents remember useful evidence:
 
-核心方向目前是 **KV cache reuse / cross-model state transfer / prefix caching / LLM serving efficiency**，同时默认纳入 **安全、隐私、prompt leakage、多租户 KV sharing 风险**。
+- what papers say
+- which methods have worked before
+- which experiments failed and why
+- which metrics changed across runs
+- what to try in the next experiment
 
-## What This Is For
+The default example domain is LLM systems research, especially KV-cache reuse, prefix caching, cross-model state transfer, serving efficiency, and related safety/privacy risks. The workflow is domain-agnostic: replace the papers, watched folders, and metrics contract with your own research area.
 
-这套 workflow 要解决两个实际问题：
+![Research agent memory workflow](assets/readme-workflow.png)
 
-1. **找 idea 和研究空白**
-   把 Zotero / PDF / Excel 文献目录 / OpenReview / arXiv / 本地论文文件夹沉淀到 ResearchKB，再让 Codex 用这些证据做 idea generation、novelty check、limitations mining 和 next experiment planning。
+## Who This Is For
 
-2. **实验失败时快速定位问题**
-   把真实实验输出、日志、失败类型、修复过程写进 `experiment_runs` 和 `problem_cases`。下次出现质量崩溃、OOM、timeout、NaN、指标异常、route failure、transfer failure 时，Codex 先查历史案例和相关论文，再给修复建议。
+Use this if you want an AI coding/research assistant to do more than answer from the current chat context.
 
-最终要达到的状态：
+Typical use cases:
 
-- 你正常做实验，不需要手动整理大段笔记。
-- 实验输出自动进入 ResearchKB。
-- 你问“这个实验为什么失败”时，Codex 自动查类似失败和论文证据。
-- 你问“下一轮怎么做”时，Codex 自动结合最近实验、文献限制、安全风险和可测指标给计划。
-- GitHub 里沉淀可迁移的工具、配置模板、健康检查和工作流记录。
+- You have many PDFs and want an agent to search them for ideas, limitations, and related work.
+- You run experiments and want the outputs to become structured memory.
+- You repeatedly debug similar training/evaluation failures and want previous fixes to be reusable.
+- You want next-round experiment plans grounded in recent runs and literature evidence.
+- You use Obsidian or Zotero for human organization, but need a more machine-queryable layer for agents.
 
-## Workflow Diagram
-
-![AI Research Workflow](assets/readme-workflow.png)
-
-The image was generated with the OpenAI image generation workflow and committed as a static README asset.
-
-## End-to-End Workflow
-
-### 1. 文献进入 ResearchKB
-
-文献来源可以是：
-
-- Zotero + Better BibTeX export
-- 本地 PDF 文件夹
-- Excel 论文分类表
-- arXiv / OpenReview / OpenAlex / Semantic Scholar / author pages
-- 手动补充的重点论文
-
-入库后形成几类数据：
-
-- `papers`: 论文元数据
-- `chunks`: PDF / abstract / table / appendix 等文本块
-- `claims`: 方法、实验、限制、安全风险等结构化 claim
-- `problem_cases`: 失败案例和解决经验
-- `experiment_runs`: 实验运行记录、指标、日志路径、失败类型
-
-### 2. Codex / Claude / Cursor 使用 ResearchKB
-
-平时仍然在 Codex、Claude Code、Cursor 里工作，但遇到研究问题时，AI 助手应该优先查 ResearchKB。
-
-典型触发：
-
-- “这个实验失败了”
-- “为什么质量崩了”
-- “下一轮实验怎么做”
-- “这个 idea 新不新”
-- “有没有类似论文”
-- “帮我做 ablation plan”
-- “这个结果能不能写成 claim”
-
-默认行为：
-
-- 失败分析先查 `problem_cases` 和相关论文。
-- 下一轮实验先查 `experiment_runs`、method claims、limitation claims、安全/隐私 claims。
-- KV-cache reuse 方向默认额外检查 prompt leakage、multi-tenant KV sharing、confidential serving 等风险。
-
-### 3. 实验输出自动沉淀
-
-实验脚本应该尽量输出可解析结果：
-
-- `metrics.json`
-- `results.json`
-- `summary.json`
-- `eval_results.json`
-- 或日志里的 `METRIC key=value`
-
-本机定时任务 `ResearchKB-AutoHarvest` 每 5 分钟扫描 `<ResearchKBRoot>\config\auto_harvest_paths.txt` 里的窄目录，把结果写入 ResearchKB。
-
-典型 watched paths 应使用占位符或环境变量，不要把个人用户名和真实项目绝对路径提交到 GitHub：
-
-```text
-<ResearchKBRoot>\exports
-<ResearchKBRoot>\auto_ingest
-<ProjectRoot>\results
-<ProjectRoot>\docs\draftkv
-```
-
-远程 GPU 服务器上的实验不会被 Windows 定时任务直接扫描，需要：
-
-- 把结果同步回本机 watched path；或
-- 在远端单独部署同类 harvester；或
-- Codex 在实验结束后显式运行 `rk-harvest`。
-
-### 4. 失败案例进入 problem memory
-
-失败不是只留在聊天里，而是要变成可检索经验。
-
-应该记录：
-
-- symptom: 表面现象，例如 quality collapse / empty patch layers / route failure
-- context: 数据集、模型、配置、运行环境
-- suspected causes: 可能原因
-- tried fixes: 试过的修复
-- final solution: 最终有效方案
-- evidence: 日志证据和论文证据
-
-这样下次 Codex 看到类似错误时，可以优先复用已有经验，而不是重新猜。
-
-### 5. 下一轮实验计划
-
-一个合格的 next experiment plan 不应该只是“多试几个参数”。
-
-它应该包含：
-
-- dataset 和样本量
-- baseline / oracle / reuse-only / proposed method
-- quality metric，例如 F1、EM、accuracy、retention
-- efficiency metric，例如 TTFT、total latency、memory、payload size
-- success criterion
-- failure criterion
-- ablation
-- safety/privacy check
-- expected evidence：跑完以后能支持或否定什么 claim
-
-KV-cache reuse 实验建议遵循 [researchkb/kv_experiment_metrics_contract.md](researchkb/kv_experiment_metrics_contract.md)。
-
-## Daily Usage
-
-### 检查这套系统是否还活着
-
-```powershell
-$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
-.\researchkb\rk-health.cmd
-.\researchkb\rk-health.cmd --json
-```
-
-它会检查：
-
-- `ResearchKB-AutoHarvest` 是否存在、是否运行成功
-- watched paths 是否存在
-- auto-harvest 日志是否有 parse failure
-- SQLite 数据库里 papers / chunks / claims / problem_cases / experiment_runs 数量
-- 最近实验记录
-- `with_metrics / experiment_runs` 覆盖率
-
-### 让新实验能被自动记录
-
-把实验结果写入 watched path，或者让 Codex 在实验结束后运行：
-
-```powershell
-<ResearchKBRoot>\rk-harvest.cmd --project "KV Cache Reuse" <workspace-or-output-dir>
-```
-
-如果是新项目，只添加窄目录到：
-
-```text
-<ResearchKBRoot>\config\auto_harvest_paths.txt
-```
-
-不要扫描整个 Desktop、Documents 或用户目录。
-
-### 失败时应该怎么问
-
-直接说：
-
-```text
-这个实验失败了，帮我从 ResearchKB 里找类似失败案例和解决方法。
-```
-
-或者更自然：
-
-```text
-为什么这个 run 质量崩了？
-```
-
-Codex 应该自动组合三类证据：
-
-- 当前 log / stack trace
-- ResearchKB 的历史 `problem_cases`
-- 相关论文 claim / limitation / safety evidence
-
-### 做下一轮计划时应该怎么问
-
-```text
-根据最近实验结果和文献，给我下一轮实验计划。
-```
-
-Codex 应该输出：
-
-- 当前路线是否继续
-- 哪个失败要先排除
-- 下一组实验表
-- 每个实验的 metric、成功标准、风险
-- 是否需要安全/隐私/泄漏检查
-
-## How To Measure Whether It Works
-
-这套系统不能只看“有没有搭起来”，要看它是否减少重复劳动、减少重复踩坑、提高实验决策质量。
-
-### Infrastructure Health
-
-- 定时任务最新结果为 `0`
-- auto-harvest `parse_failed=0`
-- watched paths 都存在
-- ResearchKB MCP / CLI 能返回 evidence
-
-### Knowledge Coverage
-
-- papers / chunks / claims 是否持续增长
-- KV-cache reuse 相关论文是否能被检索到
-- safety/privacy/leakage 证据是否覆盖
-- novelty check 是否能找到 closest prior work
-
-### Experiment Memory Quality
-
-关键指标：
-
-```text
-with_metrics / experiment_runs
-```
-
-目标：
-
-- 当前可用阈值：能查到 recent runs 和 failure cases
-- 短期目标：结构化 metrics 覆盖率超过 `0.70`
-- 长期目标：每次失败都有 `failure_type`，每次关键实验都有质量、速度、内存和安全字段
-
-### Research Utility
-
-有用的表现：
-
-- 同类 failure 第二次出现时，不再从零分析
-- next experiment plan 能引用最近 run 和论文证据
-- idea check 能指出 closest prior work 和差异点
-- 实验计划能明确 stop / continue / redesign，而不是泛泛建议
-
-## Repository Layout
+## What This Repository Contains
 
 ```text
 .
+|-- assets/
+|   `-- readme-workflow.png
+|-- docs/
+|   `-- README.md
 |-- launchers/
+|   |-- README.md
 |   |-- claude-gpt54.cmd
 |   |-- claude-gpt54.ps1
 |   |-- claude-claude-openrouter.cmd
 |   |-- claude-claude-openrouter.ps1
 |   `-- claude-launcher-common.ps1
 |-- researchkb/
-|   |-- rk_health.py
-|   |-- rk-health.cmd
 |   |-- auto_harvest_paths.example.txt
-|   `-- kv_experiment_metrics_contract.md
+|   |-- kv_experiment_metrics_contract.md
+|   |-- rk-health.cmd
+|   `-- rk_health.py
 |-- scripts/
 |   `-- cursor_mcp_smoke.py
-|-- assets/
-|   `-- README images and static visual assets
-|-- docs/
-|   `-- README.md
 |-- .gitignore
 `-- README.md
 ```
 
-## Components
+Important boundary: this repository contains portable templates and helper scripts only. It does not contain your actual ResearchKB database, PDFs, Zotero profile, experiment logs, API keys, private config, or machine-specific paths.
+
+## Core Idea
+
+Most research assistants forget useful context because the evidence lives in disconnected places:
+
+- Papers live in Zotero, PDFs, spreadsheets, or browser tabs.
+- Experiment results live in output folders.
+- Debugging knowledge lives in chat transcripts.
+- Ideas and decisions live in notes.
+
+This workflow adds a structured memory layer between those sources and your AI agent.
+
+```text
+Papers / PDFs / Zotero / notes
+        |
+        v
+ResearchKB ingestion
+        |
+        v
+papers + chunks + claims + experiment_runs + problem_cases
+        |
+        v
+Codex / Claude Code / Cursor queries ResearchKB when needed
+        |
+        v
+better troubleshooting, idea search, novelty checks, and experiment plans
+```
+
+## Quick Start
+
+### 1. Clone This Repository
+
+```powershell
+git clone https://github.com/drongzzz0/obsidian.git
+cd obsidian
+```
+
+### 2. Point The Tools At Your ResearchKB Root
+
+Set `RESEARCHKB_ROOT` to the directory where your ResearchKB installation lives.
+
+PowerShell:
+
+```powershell
+$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
+```
+
+Optional persistent setup:
+
+```powershell
+[Environment]::SetEnvironmentVariable("RESEARCHKB_ROOT", "<ResearchKBRoot>", "User")
+```
+
+Do not commit your real absolute path. Use placeholders in public docs and examples.
+
+### 3. Configure Auto-Harvest Paths
+
+Copy the example watch-list into your ResearchKB config directory and edit it for your own projects.
+
+```powershell
+Copy-Item .\researchkb\auto_harvest_paths.example.txt "<ResearchKBRoot>\config\auto_harvest_paths.txt"
+notepad "<ResearchKBRoot>\config\auto_harvest_paths.txt"
+```
+
+Example:
+
+```text
+<ResearchKBRoot>\exports
+<ResearchKBRoot>\auto_ingest
+<ProjectRoot>\results
+<ProjectRoot>\docs\draft
+```
+
+Keep the paths narrow. Do not watch an entire home directory, Desktop, Documents folder, or large shared drive.
+
+### 4. Check System Health
+
+```powershell
+.\researchkb\rk-health.cmd
+```
+
+JSON output:
+
+```powershell
+.\researchkb\rk-health.cmd --json
+```
+
+The health check reports whether ResearchKB is usable, whether watched paths exist, whether harvest logs show parse failures, and whether recent experiment memory contains structured metrics.
+
+### 5. Make Experiments Emit Parseable Results
+
+Your experiment should write at least one small structured artifact:
+
+```text
+metrics.json
+results.json
+summary.json
+eval_results.json
+```
+
+or print parseable metric lines:
+
+```text
+METRIC accuracy=0.842
+METRIC latency_ms=128.5
+METRIC peak_memory_mb=9216
+```
+
+For KV-cache reuse experiments, use the suggested fields in [researchkb/kv_experiment_metrics_contract.md](researchkb/kv_experiment_metrics_contract.md).
+
+### 6. Harvest Results
+
+If you do not use a scheduler, harvest manually:
+
+```powershell
+<ResearchKBRoot>\rk-harvest.cmd --project "Your Project Name" <workspace-or-output-dir>
+```
+
+After ingestion, future agent sessions can query recent runs, metrics, failures, and related evidence.
+
+## Agent Workflows
+
+### Troubleshoot A Failed Experiment
+
+Ask your agent:
+
+```text
+This experiment failed. Search ResearchKB for similar failure cases and related paper evidence before proposing a fix.
+```
+
+A good agent response should combine:
+
+- the current log or stack trace
+- similar `problem_cases` from ResearchKB
+- relevant paper claims, limitations, or safety evidence
+- a concrete fix plan and verification command
+
+### Plan The Next Experiment
+
+Ask:
+
+```text
+Based on recent experiment results and literature evidence, propose the next experiment plan.
+```
+
+A useful plan should include:
+
+- dataset
+- baseline
+- method variant
+- ablation
+- metric
+- success criterion
+- failure criterion
+- safety/privacy check when relevant
+- expected evidence for or against the research claim
+
+### Check Whether An Idea Is Novel
+
+Ask:
+
+```text
+Check this idea against ResearchKB and public literature metadata. Identify closest prior work and the real novelty gap.
+```
+
+A useful novelty check should not simply say "looks new". It should identify the closest related work, explain the difference, and point out what evidence would be needed to make the claim credible.
+
+## ResearchKB Data Model
+
+This workflow assumes the knowledge base can store or expose these record types:
+
+- `papers`: paper metadata
+- `chunks`: searchable text chunks from abstracts, PDFs, appendices, tables, or notes
+- `claims`: structured method, limitation, experiment, and safety claims
+- `experiment_runs`: experiment configs, outputs, metrics, logs, and status
+- `problem_cases`: failure symptoms, causes, attempted fixes, and final solutions
+
+The exact implementation can vary. The important part is that agents can query these records during normal work.
+
+## Role Of Each Tool
 
 ### ResearchKB
 
-Lives outside this repository. Set its location with `RESEARCHKB_ROOT`.
-
-This repository keeps portable helper files and documentation, but the actual DB, PDFs, logs and venv stay outside Git.
+The machine-readable memory layer. It stores literature evidence, experiment records, and failure cases.
 
 ### Obsidian
 
-Used as a human-facing knowledge layer and optional review surface. It is not the core database. The core machine-readable memory is ResearchKB.
+The human-facing note layer. Use it for reading, summaries, idea sketches, and manual review. Do not rely on it as the only structured database.
 
 ### Zotero
 
-Used for paper management and metadata export. Better BibTeX can export bibliography data into ResearchKB.
+The paper-management layer. Use it to collect PDFs and metadata. Better BibTeX or similar export tools can feed ResearchKB.
 
-### Codex / Claude / Cursor
+### Codex / Claude Code / Cursor
 
-Used as the active research agent interface. They call tools, inspect logs, write code, run experiments, query ResearchKB and update records.
+The agent interface. These tools run commands, edit code, inspect logs, query ResearchKB, and write plans or fixes.
 
 ### GitHub
 
-Used to version:
+The portable workflow layer. Keep templates, helper scripts, diagrams, and sanitized docs here. Do not commit real databases, PDFs, auth files, or personal machine paths.
 
-- launcher scripts
-- workflow templates
-- health tooling
-- sanitized documentation
-- README and diagrams
+## Claude Code Launcher Templates
 
-It should not store secrets, large PDFs, local DB files, personal caches, machine-specific logs, or personal absolute paths.
+The `launchers/` directory contains optional Claude Code launcher templates.
 
-## Claude Code Launchers
+They are useful if you want separate local entrypoints for different model providers or API routes. They are not required for ResearchKB itself.
 
-The `launchers/` directory provides two local Claude Code entrypoints:
+Read [launchers/README.md](launchers/README.md) before using them.
 
-- `claude-gpt54.cmd`: reuses the current GPT route from the local Claude user settings.
-- `claude-claude-openrouter.cmd`: routes Claude Code through OpenRouter and defaults to `anthropic/claude-sonnet-4.6`.
+Rules:
 
-Usage:
+- Keep API keys in environment variables or local private config.
+- Do not commit provider tokens.
+- Treat these scripts as templates and adapt them to your own provider setup.
+
+## Cursor MCP Smoke Test
+
+Use `scripts/cursor_mcp_smoke.py` to sanity-check MCP server definitions from a Cursor MCP config.
 
 ```powershell
-.\launchers\claude-gpt54.cmd
-.\launchers\claude-claude-openrouter.cmd
+python .\scripts\cursor_mcp_smoke.py --help
 ```
 
-Design notes:
+This is a lightweight check. It does not replace end-to-end testing inside Cursor.
 
-- The launchers preserve non-secret settings such as permissions and enabled plugins.
-- API credentials are read from runtime environment variables or existing local user settings.
-- No API key is intended to be committed into this repository.
+## How To Measure Whether The Workflow Works
 
-See [launchers/README.md](launchers/README.md) for details.
+The workflow is useful only if it improves research decisions. Track these signals:
 
-## Other Scripts
+### Infrastructure Health
 
-### `scripts/cursor_mcp_smoke.py`
+- Health check passes.
+- Auto-harvest runs successfully.
+- Watched paths exist.
+- Parse failures stay near zero.
+- ResearchKB queries return evidence.
 
-Runs a lightweight MCP server smoke test from a Cursor MCP configuration file.
+### Knowledge Coverage
 
-## Security and Privacy
+- Paper count, chunk count, and claim count increase over time.
+- Important papers can be retrieved by topic.
+- Limitation and safety claims are searchable.
+- Closest-prior-work queries return meaningful results.
 
-This repository intentionally excludes:
+### Experiment Memory Quality
 
-- `tmp/`
-- Python bytecode and cache directories
-- local installers and downloaded binaries
-- generated PDFs, ZIPs, PNGs and render caches
-- actual ResearchKB SQLite DB / PDFs / Zotero profile data
-- API keys and auth files
+Track:
 
-Before pushing future changes, run:
+```text
+structured_metrics_runs / total_experiment_runs
+```
+
+Suggested target:
+
+```text
+>= 0.70
+```
+
+Also track whether failed runs include:
+
+- `failure_type`
+- log path
+- config path
+- final fix
+- affected metric
+
+### Research Utility
+
+The workflow is working when:
+
+- repeated failures are diagnosed faster the second time
+- next experiment plans cite recent runs and paper evidence
+- idea checks identify closest prior work instead of giving generic advice
+- experiment decisions become `continue`, `stop`, or `redesign`, not vague suggestions
+
+## Privacy And Security
+
+Do not commit:
+
+- API keys
+- auth tokens
+- private SSH keys
+- local absolute paths
+- personal usernames
+- machine-specific logs
+- ResearchKB SQLite databases
+- Zotero profiles
+- PDFs that you do not have permission to redistribute
+- large generated artifacts
+
+Before pushing changes, run:
 
 ```powershell
-rg -n "sk-|api[_-]?key|auth[_-]?token|password|secret|bearer" . -g "!tmp/**" -g "!**/__pycache__/**"
+rg -n "sk-|api[_-]?key|auth[_-]?token|password|secret|bearer" .
+rg -n "<your-username>|<private-host>|<private-project-name>" .
 git status -sb --ignored
 ```
 
-## Current Known Limitation
+Use placeholders in committed examples:
 
-The workflow is operational, but the main bottleneck is not infrastructure. It is **structured experiment quality**.
-
-If future experiments only leave unstructured logs, ResearchKB can still harvest them, but automatic comparison and planning will be weak. The practical fix is to make every important experiment emit a small JSON result file following [researchkb/kv_experiment_metrics_contract.md](researchkb/kv_experiment_metrics_contract.md).
-
-## Development Loop
-
-```powershell
-git status -sb
-python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py
-.\researchkb\rk-health.cmd
-git add -A
-git commit -m "Describe the workflow change"
-git push
+```text
+<ResearchKBRoot>
+<ProjectRoot>
+<workspace-or-output-dir>
 ```
 
-## License
+## Development Checks
 
-No explicit open-source license has been selected yet. Add a `LICENSE` file before treating this as reusable third-party open-source code.
+Compile the Python helper scripts:
+
+```powershell
+python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py
+```
+
+Run the ResearchKB health check:
+
+```powershell
+$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
+.\researchkb\rk-health.cmd --json
+```
+
+## Project Status
+
+This repository is a workflow template, not a packaged product. Expect to adapt:
+
+- ingestion commands
+- ResearchKB schema details
+- watched paths
+- model-provider launchers
+- experiment metrics
+- agent prompt conventions
+
+The core design principle should stay the same: keep private data local, commit only portable workflow code, and make research evidence queryable by agents during normal work.
