@@ -165,24 +165,58 @@ $env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
 .\researchkb\rk-health.cmd --json
 ```
 
-## 最小可用配置
+## 第一天怎么跑通
 
-第一天不需要把所有东西都配置完。先只做三个决定：
+先让一个 fake run 或真实 run 能被 ResearchKB 采集和查询。不要一开始就配置整套系统。
 
-1. **ResearchKB root：** 本地知识库放在哪里。
-2. **一个 watched folder：** 先选一个正在做的项目输出目录。
-3. **一个 metrics 格式：** 先统一成小的 `metrics.json`，或者日志里的 `METRIC key=value`。
+```powershell
+$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
+$project = "<ProjectRoot>"
+$run = "$project\runs\smoke-test"
+New-Item -ItemType Directory -Force $run
+```
 
-在 health check 通过、一个实验 run 能被采集之前，可以先不管 `launchers/`、Zotero 导出、Obsidian 组织方式和复杂 schema 映射。
+写一个最小结果文件：
 
-## 后续再自定义什么
+```powershell
+@'
+{
+  "experiment": "smoke-test",
+  "status": "ok",
+  "accuracy": 0.842,
+  "latency_ms": 128.5,
+  "notes": "first ResearchKB ingestion test"
+}
+'@ | Set-Content "$run\metrics.json" -Encoding UTF8
+```
 
-| 部分 | 先怎么用 | 什么时候再改 |
-| --- | --- | --- |
-| ResearchKB schema | 先按 `papers`、`chunks`、`claims`、`experiment_runs`、`problem_cases` 理解 | 你的数据库表名或字段名不一样时 |
-| 入库命令 | 先手动跑 `rk-harvest.cmd` | 需要定时采集或远程采集时 |
-| 实验指标 | 先写 `metrics.json` | 需要领域特定指标时 |
-| Agent prompt | 先用上面的示例 | 团队形成固定排错或实验规划流程后 |
-| 模型启动器 | 可以先忽略 | 需要给不同供应商准备独立入口时 |
+只把这个项目输出目录加到 watch-list：
 
-推荐路径是：clone 仓库，设置 `RESEARCHKB_ROOT`，监听一个输出目录，采集一个 run，确认闭环跑通后再逐步加自动化。
+```powershell
+Add-Content "<ResearchKBRoot>\config\auto_harvest_paths.txt" "$project\runs"
+```
+
+跑两个检查：
+
+```powershell
+.\researchkb\rk-health.cmd
+<ResearchKBRoot>\rk-harvest.cmd --project "Smoke Test" "$run"
+```
+
+然后问 agent：
+
+```text
+在 ResearchKB 里找到最新的 Smoke Test run，告诉我记录了哪些 metrics。
+```
+
+如果 agent 能回答，说明闭环已经跑通。真实项目、Zotero 导出、Obsidian 笔记、launchers 和定时采集都可以等这个最小闭环成功后再加。
+
+## 跑通以后再加什么
+
+| 下一步 | 什么时候做 |
+| --- | --- |
+| 加更多 watched folders | 一个 run 已经能被采集和查询后 |
+| 加 Zotero 或 PDF 入库 | 实验记忆路径已经确认可用后 |
+| 改 schema 映射 | 你的 ResearchKB 表名或字段名不一致时 |
+| 加领域特定 metrics | 通用 `metrics.json` 不够用时 |
+| 加模型启动器 | 需要给不同供应商准备独立入口时 |

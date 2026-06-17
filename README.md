@@ -165,24 +165,58 @@ $env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
 .\researchkb\rk-health.cmd --json
 ```
 
-## Minimum Viable Setup
+## Day-1 Setup: Harvest One Run
 
-You do not need to customize everything on day one. Start with only three choices:
+Start by making one fake or real experiment run searchable. Do not configure the whole stack first.
 
-1. **ResearchKB root:** where your local knowledge base lives.
-2. **One watched folder:** the output directory of one active project.
-3. **One metrics format:** a small `metrics.json` or `METRIC key=value` convention.
+```powershell
+$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
+$project = "<ProjectRoot>"
+$run = "$project\runs\smoke-test"
+New-Item -ItemType Directory -Force $run
+```
 
-Ignore `launchers/`, Zotero export, Obsidian organization, and advanced schema mapping until the health check works and one experiment run can be harvested.
+Write one minimal result file:
 
-## What To Customize Later
+```powershell
+@'
+{
+  "experiment": "smoke-test",
+  "status": "ok",
+  "accuracy": 0.842,
+  "latency_ms": 128.5,
+  "notes": "first ResearchKB ingestion test"
+}
+'@ | Set-Content "$run\metrics.json" -Encoding UTF8
+```
 
-| Area | Start with | Customize when |
-| --- | --- | --- |
-| ResearchKB schema | `papers`, `chunks`, `claims`, `experiment_runs`, `problem_cases` | Your database uses different table or field names |
-| Ingestion | Manual `rk-harvest.cmd` | You want scheduled or remote harvesting |
-| Metrics | `metrics.json` | Your experiments need domain-specific metrics |
-| Agent prompts | The examples above | Your team has a stable debugging or planning routine |
-| Model launchers | Ignore them | You need separate local entrypoints for different providers |
+Add only that project output folder to the watch-list:
 
-The intended path is: clone the repo, set `RESEARCHKB_ROOT`, watch one folder, harvest one run, then add more automation only after the first loop works.
+```powershell
+Add-Content "<ResearchKBRoot>\config\auto_harvest_paths.txt" "$project\runs"
+```
+
+Run the two checks:
+
+```powershell
+.\researchkb\rk-health.cmd
+<ResearchKBRoot>\rk-harvest.cmd --project "Smoke Test" "$run"
+```
+
+Then ask your agent:
+
+```text
+Find the latest Smoke Test run in ResearchKB and tell me what metrics were recorded.
+```
+
+If the agent can answer that, the loop works. Add real projects, Zotero exports, Obsidian notes, launchers, and scheduled harvesting only after this first run is queryable.
+
+## Customize After The First Loop Works
+
+| Next step | Do this only when |
+| --- | --- |
+| Add more watched folders | One run can already be harvested and queried |
+| Add Zotero or PDF ingestion | You know the experiment-memory path works |
+| Change schema mapping | Your ResearchKB tables or fields differ |
+| Add domain metrics | The generic `metrics.json` is not enough |
+| Add model launchers | You need separate local entrypoints for different providers |
