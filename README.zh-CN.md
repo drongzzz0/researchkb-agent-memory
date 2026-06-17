@@ -131,6 +131,10 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 |-- SECURITY.md
 |-- assets/
 |   `-- readme-workflow-v2.png
+|-- docs/
+|   |-- architecture.md
+|   |-- schema_minimal.md
+|   `-- agent_tool_contracts.md
 |-- launchers/
 |   `-- Claude Code launcher templates
 |-- researchkb/
@@ -152,6 +156,12 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 - `researchkb/kv_experiment_metrics_contract.md`: KV-cache reuse 实验指标建议。
 - `scripts/cursor_mcp_smoke.py`: Cursor MCP 配置 smoke test。
 - `launchers/`: 可选 Claude Code 启动器模板。真实 API key 不要放进仓库。
+
+## 核心设计文档
+
+- [docs/architecture.md](docs/architecture.md): project run -> harvest -> ResearchKB -> agent query 闭环。
+- [docs/schema_minimal.md](docs/schema_minimal.md): 最小记录结构和 evidence provenance 字段。
+- [docs/agent_tool_contracts.md](docs/agent_tool_contracts.md): agent 工具输入输出和 evidence-grounded answer 格式。
 
 ## 隐私规则
 

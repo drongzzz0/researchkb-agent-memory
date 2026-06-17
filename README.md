@@ -131,6 +131,10 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 |-- SECURITY.md
 |-- assets/
 |   `-- readme-workflow-v2.png
+|-- docs/
+|   |-- architecture.md
+|   |-- schema_minimal.md
+|   `-- agent_tool_contracts.md
 |-- launchers/
 |   `-- Claude Code launcher templates
 |-- researchkb/
@@ -152,6 +156,12 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 - `researchkb/kv_experiment_metrics_contract.md`: suggested metrics for KV-cache reuse experiments.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.
 - `launchers/`: optional Claude Code launcher templates. Keep real API keys outside this repo.
+
+## Design Docs
+
+- [docs/architecture.md](docs/architecture.md): project run -> harvest -> ResearchKB -> agent query loop.
+- [docs/schema_minimal.md](docs/schema_minimal.md): minimal records and evidence provenance fields.
+- [docs/agent_tool_contracts.md](docs/agent_tool_contracts.md): expected tool inputs, outputs, and evidence-grounded answer format.
 
 ## Privacy Rules
 
