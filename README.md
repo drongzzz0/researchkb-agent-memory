@@ -118,7 +118,8 @@ METRIC latency_ms=128.5
 METRIC peak_memory_mb=9216
 ```
 
-For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](researchkb/kv_experiment_metrics_contract.md).
+For the generic contract, see [researchkb/contracts/experiment_metrics_contract.md](researchkb/contracts/experiment_metrics_contract.md).
+For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contract.md](researchkb/contracts/kv_cache_reuse_metrics_contract.md).
 
 ## Repository Layout
 
@@ -144,6 +145,9 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 |-- launchers/
 |   `-- Claude Code launcher templates
 |-- researchkb/
+|   |-- contracts/
+|   |   |-- experiment_metrics_contract.md
+|   |   `-- kv_cache_reuse_metrics_contract.md
 |   |-- auto_harvest_paths.example.txt
 |   |-- kv_experiment_metrics_contract.md
 |   |-- rk-health.cmd
@@ -161,7 +165,9 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 
 - `researchkb/rk-health.cmd`: checks ResearchKB, watched paths, logs, and recent experiment-memory coverage.
 - `researchkb/auto_harvest_paths.example.txt`: safe watch-list template.
-- `researchkb/kv_experiment_metrics_contract.md`: suggested metrics for KV-cache reuse experiments.
+- `researchkb/contracts/experiment_metrics_contract.md`: generic experiment output contract.
+- `researchkb/contracts/kv_cache_reuse_metrics_contract.md`: KV-cache reuse metric and safety extension.
+- `researchkb/kv_experiment_metrics_contract.md`: compatibility pointer for older links.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.
 - `launchers/`: optional Claude Code launcher templates. Keep real API keys outside this repo.
 
@@ -236,10 +242,13 @@ Write one minimal result file:
 @'
 {
   "experiment": "smoke-test",
-  "status": "ok",
-  "accuracy": 0.842,
-  "latency_ms": 128.5,
-  "notes": "first ResearchKB ingestion test"
+  "status": "completed_positive",
+  "metrics": {
+    "accuracy": 0.842,
+    "latency_ms": 128.5
+  },
+  "decision": "continue",
+  "next_action": "replace this smoke run with one real project output"
 }
 '@ | Set-Content "$run\metrics.json" -Encoding UTF8
 ```

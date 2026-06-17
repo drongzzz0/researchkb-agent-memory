@@ -118,7 +118,8 @@ METRIC latency_ms=128.5
 METRIC peak_memory_mb=9216
 ```
 
-KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contract.md](researchkb/kv_experiment_metrics_contract.md)。
+通用实验输出约定见 [researchkb/contracts/experiment_metrics_contract.md](researchkb/contracts/experiment_metrics_contract.md)。
+KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_contract.md](researchkb/contracts/kv_cache_reuse_metrics_contract.md)。
 
 ## 仓库结构
 
@@ -144,6 +145,9 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 |-- launchers/
 |   `-- Claude Code launcher templates
 |-- researchkb/
+|   |-- contracts/
+|   |   |-- experiment_metrics_contract.md
+|   |   `-- kv_cache_reuse_metrics_contract.md
 |   |-- auto_harvest_paths.example.txt
 |   |-- kv_experiment_metrics_contract.md
 |   |-- rk-health.cmd
@@ -161,7 +165,9 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 
 - `researchkb/rk-health.cmd`: 检查 ResearchKB、watched paths、日志和最近实验记忆覆盖率。
 - `researchkb/auto_harvest_paths.example.txt`: 安全的 watch-list 模板。
-- `researchkb/kv_experiment_metrics_contract.md`: KV-cache reuse 实验指标建议。
+- `researchkb/contracts/experiment_metrics_contract.md`: 通用实验输出约定。
+- `researchkb/contracts/kv_cache_reuse_metrics_contract.md`: KV-cache reuse 指标和安全扩展约定。
+- `researchkb/kv_experiment_metrics_contract.md`: 旧链接兼容入口。
 - `scripts/cursor_mcp_smoke.py`: Cursor MCP 配置 smoke test。
 - `launchers/`: 可选 Claude Code 启动器模板。真实 API key 不要放进仓库。
 
@@ -236,10 +242,13 @@ New-Item -ItemType Directory -Force $run
 @'
 {
   "experiment": "smoke-test",
-  "status": "ok",
-  "accuracy": 0.842,
-  "latency_ms": 128.5,
-  "notes": "first ResearchKB ingestion test"
+  "status": "completed_positive",
+  "metrics": {
+    "accuracy": 0.842,
+    "latency_ms": 128.5
+  },
+  "decision": "continue",
+  "next_action": "replace this smoke run with one real project output"
 }
 '@ | Set-Content "$run\metrics.json" -Encoding UTF8
 ```

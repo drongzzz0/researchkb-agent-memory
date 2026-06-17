@@ -7,6 +7,8 @@ This directory describes the portable ResearchKB Agent Memory contracts. It shou
 - [architecture.md](architecture.md): end-to-end loop and component boundaries.
 - [schema_minimal.md](schema_minimal.md): minimal schema for papers, claims, runs, failure cases, and evidence links.
 - [agent_tool_contracts.md](agent_tool_contracts.md): expected tool inputs and outputs for agents.
+- [../researchkb/contracts/experiment_metrics_contract.md](../researchkb/contracts/experiment_metrics_contract.md): generic experiment output contract.
+- [../researchkb/contracts/kv_cache_reuse_metrics_contract.md](../researchkb/contracts/kv_cache_reuse_metrics_contract.md): KV-cache reuse metric and safety extension.
 
 ## Examples
 

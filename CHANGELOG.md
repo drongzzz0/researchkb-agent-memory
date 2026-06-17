@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Split experiment metrics contracts into a generic contract and a KV-cache reuse extension.
 - Added synthetic `examples/` for smoke runs, failure cases, paper memory, and evidence-grounded agent answers.
 - Improved `rk_health.py` with readiness levels, missing-table tolerance, `--root`, `--strict`, and next actions.
 - Added pytest coverage for empty, smoke, usable, mature, watch-list, and UTF-16 log cases.
