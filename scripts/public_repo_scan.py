@@ -118,7 +118,8 @@ def iter_files(root: Path):
             continue
         if path.suffix.lower() in SKIP_SUFFIXES:
             continue
-        if any(part in SKIP_DIRS for part in path.parts):
+        rel_parts = path.relative_to(root).parts
+        if any(part in SKIP_DIRS for part in rel_parts):
             continue
         yield path
 
