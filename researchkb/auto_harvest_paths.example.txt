@@ -3,4 +3,6 @@
 <ResearchKBRoot>\exports
 <ResearchKBRoot>\auto_ingest
 <ProjectRoot>\results
-<ProjectRoot>\docs\draftkv
+<ProjectRoot>\runs
+<ProjectRoot>\logs
+<ProjectRoot>\docs\draft

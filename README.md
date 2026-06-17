@@ -6,6 +6,28 @@ A lightweight workflow template for giving Codex, Claude Code, Cursor, and other
 
 ![ResearchKB Agent Memory workflow](assets/readme-workflow-v2.png)
 
+## What This Repo Is
+
+This is a public workflow starter kit for connecting local ResearchKB data to research agents.
+
+It provides:
+
+- public templates
+- experiment output contracts
+- health-check scripts
+- launcher examples
+- agent prompt patterns
+- privacy rules
+
+It does not provide:
+
+- your private ResearchKB database
+- private papers or PDFs
+- Zotero profile data
+- experiment logs
+- API keys
+- a hosted RAG service
+
 ## What It Does
 
 Research agents are more useful when they can query evidence instead of relying only on the current chat. This repo provides public, portable glue for that workflow:
@@ -102,6 +124,11 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 
 ```text
 .
+|-- CHANGELOG.md
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- ROADMAP.md
+|-- SECURITY.md
 |-- assets/
 |   `-- readme-workflow-v2.png
 |-- launchers/
@@ -113,6 +140,7 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 |   `-- rk_health.py
 |-- scripts/
 |   `-- cursor_mcp_smoke.py
+|-- .gitignore
 |-- README.zh-CN.md
 `-- README.md
 ```

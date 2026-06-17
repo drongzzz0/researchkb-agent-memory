@@ -6,6 +6,28 @@
 
 ![ResearchKB Agent Memory workflow](assets/readme-workflow-v2.png)
 
+## 这个仓库是什么
+
+这是一个公开的 workflow starter kit，用来把本地 ResearchKB 数据接入 research agents。
+
+它提供：
+
+- 公开模板
+- 实验输出约定
+- 健康检查脚本
+- launcher 示例
+- agent 使用 prompt
+- 隐私边界规则
+
+它不提供：
+
+- 你的私有 ResearchKB 数据库
+- 私有论文 PDF
+- Zotero profile
+- 实验日志
+- API key
+- 托管版 RAG 服务
+
 ## 它解决什么问题
 
 Agent 只看当前对话时，很容易忘记论文、历史实验和以前踩过的坑。这个仓库提供的是可公开、可迁移的连接层：
@@ -102,6 +124,11 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 
 ```text
 .
+|-- CHANGELOG.md
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- ROADMAP.md
+|-- SECURITY.md
 |-- assets/
 |   `-- readme-workflow-v2.png
 |-- launchers/
@@ -113,6 +140,7 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 |   `-- rk_health.py
 |-- scripts/
 |   `-- cursor_mcp_smoke.py
+|-- .gitignore
 |-- README.zh-CN.md
 `-- README.md
 ```
