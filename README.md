@@ -165,6 +165,24 @@ $env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
 .\researchkb\rk-health.cmd --json
 ```
 
-## Status
+## Minimum Viable Setup
 
-This is a workflow template, not a complete packaged product. Adapt the ingestion commands, schema details, model launchers, watched paths, and metrics to your own research setup.
+You do not need to customize everything on day one. Start with only three choices:
+
+1. **ResearchKB root:** where your local knowledge base lives.
+2. **One watched folder:** the output directory of one active project.
+3. **One metrics format:** a small `metrics.json` or `METRIC key=value` convention.
+
+Ignore `launchers/`, Zotero export, Obsidian organization, and advanced schema mapping until the health check works and one experiment run can be harvested.
+
+## What To Customize Later
+
+| Area | Start with | Customize when |
+| --- | --- | --- |
+| ResearchKB schema | `papers`, `chunks`, `claims`, `experiment_runs`, `problem_cases` | Your database uses different table or field names |
+| Ingestion | Manual `rk-harvest.cmd` | You want scheduled or remote harvesting |
+| Metrics | `metrics.json` | Your experiments need domain-specific metrics |
+| Agent prompts | The examples above | Your team has a stable debugging or planning routine |
+| Model launchers | Ignore them | You need separate local entrypoints for different providers |
+
+The intended path is: clone the repo, set `RESEARCHKB_ROOT`, watch one folder, harvest one run, then add more automation only after the first loop works.

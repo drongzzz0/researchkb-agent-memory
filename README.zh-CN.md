@@ -165,6 +165,24 @@ $env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
 .\researchkb\rk-health.cmd --json
 ```
 
-## 项目状态
+## 最小可用配置
 
-这是工作流模板，不是完整产品。实际使用时需要按自己的 ResearchKB schema、入库命令、模型入口、watched paths 和实验指标做调整。
+第一天不需要把所有东西都配置完。先只做三个决定：
+
+1. **ResearchKB root：** 本地知识库放在哪里。
+2. **一个 watched folder：** 先选一个正在做的项目输出目录。
+3. **一个 metrics 格式：** 先统一成小的 `metrics.json`，或者日志里的 `METRIC key=value`。
+
+在 health check 通过、一个实验 run 能被采集之前，可以先不管 `launchers/`、Zotero 导出、Obsidian 组织方式和复杂 schema 映射。
+
+## 后续再自定义什么
+
+| 部分 | 先怎么用 | 什么时候再改 |
+| --- | --- | --- |
+| ResearchKB schema | 先按 `papers`、`chunks`、`claims`、`experiment_runs`、`problem_cases` 理解 | 你的数据库表名或字段名不一样时 |
+| 入库命令 | 先手动跑 `rk-harvest.cmd` | 需要定时采集或远程采集时 |
+| 实验指标 | 先写 `metrics.json` | 需要领域特定指标时 |
+| Agent prompt | 先用上面的示例 | 团队形成固定排错或实验规划流程后 |
+| 模型启动器 | 可以先忽略 | 需要给不同供应商准备独立入口时 |
+
+推荐路径是：clone 仓库，设置 `RESEARCHKB_ROOT`，监听一个输出目录，采集一个 run，确认闭环跑通后再逐步加自动化。
