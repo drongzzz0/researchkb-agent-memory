@@ -1,0 +1,16 @@
+{
+  "paper_id": "paper_example_cache_001",
+  "title": "Synthetic Study of Cache Reuse Safety in Language Model Serving",
+  "authors": [
+    "Example Author",
+    "Sample Researcher"
+  ],
+  "year": 2026,
+  "venue": "Synthetic Workshop",
+  "url": "https://example.org/synthetic-cache-reuse-paper",
+  "tags": [
+    "llm-serving",
+    "cache-reuse",
+    "safety"
+  ]
+}

@@ -136,6 +136,11 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 |   |-- architecture.md
 |   |-- schema_minimal.md
 |   `-- agent_tool_contracts.md
+|-- examples/
+|   |-- smoke-run/
+|   |-- failure-case/
+|   |-- paper-memory/
+|   `-- agent-answers/
 |-- launchers/
 |   `-- Claude Code launcher templates
 |-- researchkb/
@@ -159,6 +164,13 @@ KV-cache reuse 相关实验可以参考 [researchkb/kv_experiment_metrics_contra
 - `researchkb/kv_experiment_metrics_contract.md`: KV-cache reuse 实验指标建议。
 - `scripts/cursor_mcp_smoke.py`: Cursor MCP 配置 smoke test。
 - `launchers/`: 可选 Claude Code 启动器模板。真实 API key 不要放进仓库。
+
+## 示例
+
+- [examples/smoke-run](examples/smoke-run): 第一次入库测试用的最小 `metrics.json` 和 `summary.json`。
+- [examples/failure-case](examples/failure-case): 虚构的可复用失败案例。
+- [examples/paper-memory](examples/paper-memory): paper、chunk、claim、evidence-link 记录示例。
+- [examples/agent-answers](examples/agent-answers): 好的和坏的 troubleshooting answer 对比。
 
 ## 核心设计文档
 

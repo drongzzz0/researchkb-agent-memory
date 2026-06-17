@@ -1,0 +1,9 @@
+{
+  "claim_id": "claim_example_cache_001",
+  "claim_type": "safety",
+  "statement": "Cache reuse should validate prompt-template compatibility before reuse.",
+  "paper_id": "paper_example_cache_001",
+  "chunk_id": "chunk_example_cache_001",
+  "confidence": 0.86,
+  "created_by": "human"
+}

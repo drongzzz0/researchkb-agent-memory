@@ -1,0 +1,9 @@
+{
+  "run_id": "run_example_smoke_001",
+  "summary": "The synthetic smoke test completed and emitted parseable metrics.",
+  "expected_agent_use": [
+    "Verify that the run was harvested.",
+    "Check that metrics are queryable.",
+    "Use this as the first end-to-end ingestion test."
+  ]
+}

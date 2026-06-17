@@ -1,0 +1,20 @@
+{
+  "project": "Example Research Project",
+  "experiment": "smoke-test",
+  "run_id": "run_example_smoke_001",
+  "status": "completed_positive",
+  "dataset": "synthetic-repeated-prefix",
+  "model": "example-model",
+  "seed": 42,
+  "metrics": {
+    "accuracy": 0.842,
+    "latency_ms": 128.5,
+    "peak_memory_mb": 9216
+  },
+  "decision": "continue",
+  "next_action": "Run the same check on one real project output folder.",
+  "artifacts": [
+    "summary.json"
+  ],
+  "notes": "Synthetic smoke-test example for ResearchKB ingestion."
+}

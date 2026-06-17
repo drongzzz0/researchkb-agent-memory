@@ -136,6 +136,11 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 |   |-- architecture.md
 |   |-- schema_minimal.md
 |   `-- agent_tool_contracts.md
+|-- examples/
+|   |-- smoke-run/
+|   |-- failure-case/
+|   |-- paper-memory/
+|   `-- agent-answers/
 |-- launchers/
 |   `-- Claude Code launcher templates
 |-- researchkb/
@@ -159,6 +164,13 @@ For KV-cache reuse work, see [researchkb/kv_experiment_metrics_contract.md](rese
 - `researchkb/kv_experiment_metrics_contract.md`: suggested metrics for KV-cache reuse experiments.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.
 - `launchers/`: optional Claude Code launcher templates. Keep real API keys outside this repo.
+
+## Examples
+
+- [examples/smoke-run](examples/smoke-run): minimal `metrics.json` and `summary.json` for the first ingestion test.
+- [examples/failure-case](examples/failure-case): a synthetic reusable failure case.
+- [examples/paper-memory](examples/paper-memory): paper, chunk, claim, and evidence-link records.
+- [examples/agent-answers](examples/agent-answers): good vs bad troubleshooting answers.
 
 ## Design Docs
 

@@ -8,6 +8,15 @@ This directory describes the portable ResearchKB Agent Memory contracts. It shou
 - [schema_minimal.md](schema_minimal.md): minimal schema for papers, claims, runs, failure cases, and evidence links.
 - [agent_tool_contracts.md](agent_tool_contracts.md): expected tool inputs and outputs for agents.
 
+## Examples
+
+See [../examples](../examples) for synthetic records and answer examples:
+
+- `smoke-run/`: minimal experiment output.
+- `failure-case/`: reusable problem memory.
+- `paper-memory/`: paper, chunk, claim, and evidence-link records.
+- `agent-answers/`: good and bad troubleshooting responses.
+
 ## Private Logs Are Not Tracked
 
 Project and experiment logs are intentionally excluded from this public repository.

@@ -1,0 +1,26 @@
+{
+  "problem_id": "problem_example_cache_template_mismatch",
+  "symptom": "Quality drops after enabling cache reuse.",
+  "context": {
+    "project": "Example Research Project",
+    "dataset": "synthetic-repeated-prefix",
+    "model": "example-model",
+    "change": "Enabled reuse across prompt templates."
+  },
+  "suspected_causes": [
+    "Prompt template mismatch",
+    "Cache state reused across incompatible contexts"
+  ],
+  "tried_fixes": [
+    "Disabled reuse for cross-template prompts",
+    "Added prompt-template hash validation"
+  ],
+  "final_solution": "Require a matching prompt-template hash before cache reuse.",
+  "linked_runs": [
+    "run_example_negative_001"
+  ],
+  "linked_papers": [
+    "paper_example_cache_001"
+  ],
+  "confidence": 0.84
+}
