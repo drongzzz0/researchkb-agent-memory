@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Compile Python files
+        run: python -m py_compile researchkb/rk_health.py scripts/cursor_mcp_smoke.py scripts/init_researchkb_workspace.py scripts/public_repo_scan.py
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Validate example JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in Path("examples").rglob("*.json"):
+              json.loads(path.read_text(encoding="utf-8"))
+              print(f"JSON_OK {path}")
+          PY
+
+      - name: Public hygiene scan
+        run: python scripts/public_repo_scan.py .

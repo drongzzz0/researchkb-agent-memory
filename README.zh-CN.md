@@ -46,39 +46,29 @@ git clone https://github.com/drongzzz0/obsidian.git
 cd obsidian
 ```
 
-指定你的本地 ResearchKB 目录：
+创建一个最小 smoke workspace：
 
 ```powershell
-$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
+python .\scripts\init_researchkb_workspace.py
 ```
 
-配置自动采集目录：
+它会创建：
+
+- 本地 `.runtime/researchkb` scaffold
+- 本地 `.runtime/example-project/runs/smoke-test` run
+- `config/auto_harvest_paths.txt`
+- 可解析的 `metrics.json` 和 `summary.json`
+
+然后运行：
 
 ```powershell
-Copy-Item .\researchkb\auto_harvest_paths.example.txt "<ResearchKBRoot>\config\auto_harvest_paths.txt"
-notepad "<ResearchKBRoot>\config\auto_harvest_paths.txt"
+python .\researchkb\rk_health.py --root .\.runtime\researchkb
 ```
 
-示例 watch-list：
-
-```text
-<ResearchKBRoot>\exports
-<ResearchKBRoot>\auto_ingest
-<ProjectRoot>\results
-<ProjectRoot>\docs\draft
-```
-
-检查系统是否可用：
+如果你已经有自己的 ResearchKB 安装，可以显式指定：
 
 ```powershell
-.\researchkb\rk-health.cmd
-.\researchkb\rk-health.cmd --json
-```
-
-手动采集一个项目：
-
-```powershell
-<ResearchKBRoot>\rk-harvest.cmd --project "Your Project" <workspace-or-output-dir>
+python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
 ```
 
 ## 怎么让 Agent 用它
@@ -131,6 +121,9 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |-- ROADMAP.md
 |-- SECURITY.md
 |-- pyproject.toml
+|-- .github/
+|   `-- workflows/
+|       `-- ci.yml
 |-- assets/
 |   `-- readme-workflow-v2.png
 |-- docs/
@@ -153,8 +146,12 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- rk-health.cmd
 |   `-- rk_health.py
 |-- scripts/
-|   `-- cursor_mcp_smoke.py
+|   |-- cursor_mcp_smoke.py
+|   |-- init_researchkb_workspace.py
+|   `-- public_repo_scan.py
 |-- tests/
+|   |-- test_init_researchkb_workspace.py
+|   |-- test_public_repo_scan.py
 |   `-- test_rk_health.py
 |-- .gitignore
 |-- README.zh-CN.md
@@ -168,6 +165,8 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `researchkb/contracts/experiment_metrics_contract.md`: 通用实验输出约定。
 - `researchkb/contracts/kv_cache_reuse_metrics_contract.md`: KV-cache reuse 指标和安全扩展约定。
 - `researchkb/kv_experiment_metrics_contract.md`: 旧链接兼容入口。
+- `scripts/init_researchkb_workspace.py`: 创建本地 smoke workspace，并打印下一步 health/harvest 命令。
+- `scripts/public_repo_scan.py`: 扫描公开文件里的本机路径、疑似密钥和私有痕迹。
 - `scripts/cursor_mcp_smoke.py`: Cursor MCP 配置 smoke test。
 - `launchers/`: 可选 Claude Code 启动器模板。真实 API key 不要放进仓库。
 
@@ -216,8 +215,9 @@ git status -sb --ignored
 ## 开发检查
 
 ```powershell
-python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py
+python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py .\scripts\init_researchkb_workspace.py .\scripts\public_repo_scan.py
 python -m pytest
+python .\scripts\public_repo_scan.py .
 ```
 
 ```powershell
@@ -230,40 +230,14 @@ $env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
 先让一个 fake run 或真实 run 能被 ResearchKB 采集和查询。不要一开始就配置整套系统。
 
 ```powershell
-$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
-$project = "<ProjectRoot>"
-$run = "$project\runs\smoke-test"
-New-Item -ItemType Directory -Force $run
+python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
 ```
 
-写一个最小结果文件：
+脚本会打印准确的下一步命令，大致等价于：
 
 ```powershell
-@'
-{
-  "experiment": "smoke-test",
-  "status": "completed_positive",
-  "metrics": {
-    "accuracy": 0.842,
-    "latency_ms": 128.5
-  },
-  "decision": "continue",
-  "next_action": "replace this smoke run with one real project output"
-}
-'@ | Set-Content "$run\metrics.json" -Encoding UTF8
-```
-
-只把这个项目输出目录加到 watch-list：
-
-```powershell
-Add-Content "<ResearchKBRoot>\config\auto_harvest_paths.txt" "$project\runs"
-```
-
-跑两个检查：
-
-```powershell
-.\researchkb\rk-health.cmd
-<ResearchKBRoot>\rk-harvest.cmd --project "Smoke Test" "$run"
+python .\researchkb\rk_health.py --root "<ResearchKBRoot>"
+"<ResearchKBRoot>\rk-harvest.cmd" --project "Smoke Test" "<ProjectRoot>\runs\smoke-test"
 ```
 
 然后问 agent：

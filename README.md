@@ -46,39 +46,29 @@ git clone https://github.com/drongzzz0/obsidian.git
 cd obsidian
 ```
 
-Point the helper scripts at your local ResearchKB installation:
+Create a minimal local smoke workspace:
 
 ```powershell
-$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
+python .\scripts\init_researchkb_workspace.py
 ```
 
-Configure narrow auto-harvest paths:
+This creates:
+
+- a local `.runtime/researchkb` scaffold
+- a local `.runtime/example-project/runs/smoke-test` run
+- `config/auto_harvest_paths.txt`
+- parseable `metrics.json` and `summary.json`
+
+Then run:
 
 ```powershell
-Copy-Item .\researchkb\auto_harvest_paths.example.txt "<ResearchKBRoot>\config\auto_harvest_paths.txt"
-notepad "<ResearchKBRoot>\config\auto_harvest_paths.txt"
+python .\researchkb\rk_health.py --root .\.runtime\researchkb
 ```
 
-Example watch-list:
-
-```text
-<ResearchKBRoot>\exports
-<ResearchKBRoot>\auto_ingest
-<ProjectRoot>\results
-<ProjectRoot>\docs\draft
-```
-
-Check whether the workflow is usable:
+If you already have a ResearchKB installation, point the script at it:
 
 ```powershell
-.\researchkb\rk-health.cmd
-.\researchkb\rk-health.cmd --json
-```
-
-Harvest a project manually:
-
-```powershell
-<ResearchKBRoot>\rk-harvest.cmd --project "Your Project" <workspace-or-output-dir>
+python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
 ```
 
 ## How To Use With Agents
@@ -131,6 +121,9 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |-- ROADMAP.md
 |-- SECURITY.md
 |-- pyproject.toml
+|-- .github/
+|   `-- workflows/
+|       `-- ci.yml
 |-- assets/
 |   `-- readme-workflow-v2.png
 |-- docs/
@@ -153,8 +146,12 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- rk-health.cmd
 |   `-- rk_health.py
 |-- scripts/
-|   `-- cursor_mcp_smoke.py
+|   |-- cursor_mcp_smoke.py
+|   |-- init_researchkb_workspace.py
+|   `-- public_repo_scan.py
 |-- tests/
+|   |-- test_init_researchkb_workspace.py
+|   |-- test_public_repo_scan.py
 |   `-- test_rk_health.py
 |-- .gitignore
 |-- README.zh-CN.md
@@ -168,6 +165,8 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `researchkb/contracts/experiment_metrics_contract.md`: generic experiment output contract.
 - `researchkb/contracts/kv_cache_reuse_metrics_contract.md`: KV-cache reuse metric and safety extension.
 - `researchkb/kv_experiment_metrics_contract.md`: compatibility pointer for older links.
+- `scripts/init_researchkb_workspace.py`: creates a local smoke workspace and prints the next health/harvest commands.
+- `scripts/public_repo_scan.py`: scans public files for local paths, secret-like values, and private traces.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.
 - `launchers/`: optional Claude Code launcher templates. Keep real API keys outside this repo.
 
@@ -216,8 +215,9 @@ git status -sb --ignored
 ## Development Checks
 
 ```powershell
-python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py
+python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py .\scripts\init_researchkb_workspace.py .\scripts\public_repo_scan.py
 python -m pytest
+python .\scripts\public_repo_scan.py .
 ```
 
 ```powershell
@@ -230,40 +230,14 @@ $env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
 Start by making one fake or real experiment run searchable. Do not configure the whole stack first.
 
 ```powershell
-$env:RESEARCHKB_ROOT = "<ResearchKBRoot>"
-$project = "<ProjectRoot>"
-$run = "$project\runs\smoke-test"
-New-Item -ItemType Directory -Force $run
+python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
 ```
 
-Write one minimal result file:
+The script prints the exact next commands. They are equivalent to:
 
 ```powershell
-@'
-{
-  "experiment": "smoke-test",
-  "status": "completed_positive",
-  "metrics": {
-    "accuracy": 0.842,
-    "latency_ms": 128.5
-  },
-  "decision": "continue",
-  "next_action": "replace this smoke run with one real project output"
-}
-'@ | Set-Content "$run\metrics.json" -Encoding UTF8
-```
-
-Add only that project output folder to the watch-list:
-
-```powershell
-Add-Content "<ResearchKBRoot>\config\auto_harvest_paths.txt" "$project\runs"
-```
-
-Run the two checks:
-
-```powershell
-.\researchkb\rk-health.cmd
-<ResearchKBRoot>\rk-harvest.cmd --project "Smoke Test" "$run"
+python .\researchkb\rk_health.py --root "<ResearchKBRoot>"
+"<ResearchKBRoot>\rk-harvest.cmd" --project "Smoke Test" "<ProjectRoot>\runs\smoke-test"
 ```
 
 Then ask your agent:

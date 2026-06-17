@@ -19,6 +19,12 @@ See [../examples](../examples) for synthetic records and answer examples:
 - `paper-memory/`: paper, chunk, claim, and evidence-link records.
 - `agent-answers/`: good and bad troubleshooting responses.
 
+## Bootstrap And CI
+
+- [../scripts/init_researchkb_workspace.py](../scripts/init_researchkb_workspace.py): create the first smoke workspace.
+- [../scripts/public_repo_scan.py](../scripts/public_repo_scan.py): run the same public hygiene scan used by CI.
+- [../.github/workflows/ci.yml](../.github/workflows/ci.yml): compile scripts, run tests, validate example JSON, and scan public files.
+
 ## Private Logs Are Not Tracked
 
 Project and experiment logs are intentionally excluded from this public repository.
