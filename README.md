@@ -1,5 +1,7 @@
 # ResearchKB Agent Memory Workflow
 
+English | [简体中文](README.zh-CN.md)
+
 Turn papers, experiment outputs, and failure cases into reusable memory for AI research agents.
 
 This repository is a starter workflow for connecting a local research knowledge base with tools such as Codex, Claude Code, Cursor, Obsidian, and Zotero. The goal is not to build another note-taking vault. The goal is to make research agents remember useful evidence:
@@ -12,7 +14,7 @@ This repository is a starter workflow for connecting a local research knowledge 
 
 The default example domain is LLM systems research, especially KV-cache reuse, prefix caching, cross-model state transfer, serving efficiency, and related safety/privacy risks. The workflow is domain-agnostic: replace the papers, watched folders, and metrics contract with your own research area.
 
-![Research agent memory workflow](assets/readme-workflow.png)
+![Research agent memory workflow](assets/readme-workflow-v2.png)
 
 ## Who This Is For
 
@@ -31,7 +33,8 @@ Typical use cases:
 ```text
 .
 |-- assets/
-|   `-- readme-workflow.png
+|   |-- readme-workflow.png
+|   `-- readme-workflow-v2.png
 |-- docs/
 |   `-- README.md
 |-- launchers/
@@ -49,6 +52,7 @@ Typical use cases:
 |-- scripts/
 |   `-- cursor_mcp_smoke.py
 |-- .gitignore
+|-- README.zh-CN.md
 `-- README.md
 ```
 
