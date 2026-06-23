@@ -11,6 +11,14 @@ Every experiment output directory should include at least one parseable artifact
 
 The preferred artifact is `metrics.json`.
 
+If your project already emits mixed files, normalize the run directory before ingestion:
+
+```powershell
+python .\scripts\standardize_run.py "<ProjectRoot>\runs\<run-id>"
+```
+
+This creates `run_record.json`, which follows this contract and can be used as the canonical artifact for harvesting.
+
 ## Minimum JSON Shape
 
 ```json
@@ -90,9 +98,12 @@ METRIC failure_type=timeout
 METRIC decision=rerun
 ```
 
+`scripts/standardize_run.py` can merge these log metrics with `metrics.json`, `results.json`, `summary.json`, or `eval_results.json`.
+
 ## Health Targets
 
 - `with_metrics / experiment_runs >= 0.70`
+- mature workflows should aim for `with_metrics / experiment_runs >= 0.90`
 - every failed run should include `failure_type`
 - every important run should include a decision and next action
 - publishable runs should include enough metrics to compare quality, cost, speed, and reliability

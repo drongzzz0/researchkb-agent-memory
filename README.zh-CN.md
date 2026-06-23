@@ -56,6 +56,7 @@ cd obsidian
 
 ```powershell
 python .\scripts\init_researchkb_workspace.py
+python .\scripts\standardize_run.py .\.runtime\example-project\runs\smoke-test
 python .\scripts\seed_demo_db.py
 python .\researchkb\rk_health.py --root .\.runtime\researchkb
 python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
@@ -67,6 +68,7 @@ python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
 git clone https://github.com/drongzzz0/obsidian.git
 cd obsidian
 python scripts/init_researchkb_workspace.py
+python scripts/standardize_run.py .runtime/example-project/runs/smoke-test
 python scripts/seed_demo_db.py
 python researchkb/rk_health.py --root .runtime/researchkb
 python scripts/query_demo.py --root .runtime/researchkb latest-runs
@@ -78,6 +80,7 @@ python scripts/query_demo.py --root .runtime/researchkb latest-runs
 - 本地 `.runtime/example-project/runs/smoke-test` run
 - `config/auto_harvest_paths.txt`
 - 可解析的 `metrics.json` 和 `summary.json`
+- 标准化后的 `run_record.json`
 - synthetic `.runtime/researchkb/db/literature.sqlite` 数据库
 
 这个公开 demo DB 只包含 synthetic papers、chunks、claims、evidence links、experiment runs 和 failure cases，不是你的真实 ResearchKB。
@@ -126,6 +129,14 @@ METRIC accuracy=0.842
 METRIC latency_ms=128.5
 METRIC peak_memory_mb=9216
 ```
+
+如果项目输出比较杂，既有 `metrics.json`、`results.json`、`eval_results.json`、`summary.json`，又有 `METRIC key=value` 日志，可以先标准化一个 run 目录：
+
+```powershell
+python .\scripts\standardize_run.py "<ProjectRoot>\runs\<run-id>"
+```
+
+它会写出 `run_record.json`，统一包含 `run_id`、`dataset`、`model`、`sample_count`、`quality_retention`、`latency_ms`、`failure_type`、`decision` 和 `next_action` 等字段。
 
 通用实验输出约定见 [researchkb/contracts/experiment_metrics_contract.md](researchkb/contracts/experiment_metrics_contract.md)。
 KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_contract.md](researchkb/contracts/kv_cache_reuse_metrics_contract.md)。
@@ -178,6 +189,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
+|   |-- standardize_run.py
 |   `-- validate_examples.py
 |-- tests/
 |   |-- test_init_researchkb_workspace.py
@@ -199,6 +211,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `scripts/init_researchkb_workspace.py`: 创建本地 smoke workspace，并打印下一步 health/harvest 命令。
 - `scripts/seed_demo_db.py`: 在 `.runtime/researchkb` 下创建完全 synthetic 的 demo SQLite 数据库。
 - `scripts/query_demo.py`: 查询 synthetic demo DB。
+- `scripts/standardize_run.py`: 把混合实验输出和 `METRIC key=value` 日志转换成 `run_record.json`。
 - `scripts/validate_examples.py`: 用 schemas 校验 example JSON。
 - `scripts/public_repo_scan.py`: 扫描公开文件里的本机路径、疑似密钥和私有痕迹。
 - `scripts/cursor_mcp_smoke.py`: Cursor MCP 配置 smoke test。
@@ -207,6 +220,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 ## 示例
 
 - [examples/smoke-run](examples/smoke-run): 第一次入库测试用的最小 `metrics.json` 和 `summary.json`。
+- [examples/standardized-run](examples/standardized-run): synthetic 标准化 `run_record.json` 输出。
 - [examples/failure-case](examples/failure-case): 虚构的可复用失败案例。
 - [examples/paper-memory](examples/paper-memory): paper、chunk、claim、evidence-link 记录示例。
 - [examples/agent-answers](examples/agent-answers): 好的和坏的 troubleshooting answer 对比。
@@ -250,7 +264,7 @@ git status -sb --ignored
 ## 开发检查
 
 ```powershell
-python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py .\scripts\init_researchkb_workspace.py .\scripts\public_repo_scan.py .\scripts\seed_demo_db.py .\scripts\query_demo.py .\scripts\validate_examples.py
+python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py .\scripts\init_researchkb_workspace.py .\scripts\public_repo_scan.py .\scripts\seed_demo_db.py .\scripts\query_demo.py .\scripts\standardize_run.py .\scripts\validate_examples.py
 python -m ruff check .
 python -m pytest -vv --tb=short
 python .\scripts\validate_examples.py

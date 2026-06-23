@@ -1,0 +1,25 @@
+{
+  "project": "Example Research Project",
+  "experiment": "standardized-quality-check",
+  "run_id": "run_example_standardized_001",
+  "status": "completed_negative",
+  "git_commit": "git:example",
+  "config_ref": "configs/standardized-quality-check.synthetic.json",
+  "dataset": "synthetic-eval",
+  "model": "example-model",
+  "seed": 7,
+  "metrics": {
+    "full_large_f1": 0.5,
+    "route_f1": 0.45,
+    "quality_retention": 0.9,
+    "latency_ms": 128.5,
+    "sample_count": 50
+  },
+  "failure_type": "quality_below_threshold",
+  "decision": "redesign",
+  "next_action": "Compare quality-retention drivers before launching a larger run.",
+  "artifacts": [
+    "run.metrics.txt"
+  ],
+  "notes": "Synthetic standardized run record generated from parseable metrics."
+}

@@ -9,6 +9,7 @@ from jsonschema import Draft202012Validator
 
 SCHEMA_BY_EXAMPLE = {
     ("smoke-run", "metrics.json"): "experiment_metrics.schema.json",
+    ("standardized-run", "run_record.json"): "experiment_metrics.schema.json",
     ("failure-case", "problem_case.json"): "problem_case.schema.json",
     ("paper-memory", "paper.json"): "paper.schema.json",
     ("paper-memory", "chunk.json"): "chunk.schema.json",

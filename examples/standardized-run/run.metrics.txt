@@ -1,0 +1,4 @@
+Starting synthetic quality check.
+METRIC latency_ms=128.5
+METRIC sample_count=50
+Finished synthetic quality check.

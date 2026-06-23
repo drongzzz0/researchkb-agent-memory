@@ -138,7 +138,10 @@ def seed_records(conn: sqlite3.Connection, examples_dir: Path) -> None:
     chunk = read_json(examples_dir / "paper-memory" / "chunk.json")
     claim = read_json(examples_dir / "paper-memory" / "claim.json")
     evidence = read_json(examples_dir / "paper-memory" / "evidence_link.json")
-    run = read_json(examples_dir / "smoke-run" / "metrics.json")
+    runs = [read_json(examples_dir / "smoke-run" / "metrics.json")]
+    standardized_run = examples_dir / "standardized-run" / "run_record.json"
+    if standardized_run.exists():
+        runs.append(read_json(standardized_run))
     problem = read_json(examples_dir / "failure-case" / "problem_case.json")
 
     conn.execute(
@@ -200,6 +203,26 @@ def seed_records(conn: sqlite3.Connection, examples_dir: Path) -> None:
             created_at,
         ),
     )
+    for run in runs:
+        insert_experiment_run(conn, run, created_at)
+    conn.execute(
+        "insert into problem_cases values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            problem["problem_id"],
+            problem["symptom"],
+            dumps(problem.get("context", {})),
+            dumps(problem.get("suspected_causes", [])),
+            dumps(problem.get("tried_fixes", [])),
+            problem.get("final_solution"),
+            dumps(problem.get("linked_runs", [])),
+            dumps(problem.get("linked_papers", [])),
+            problem.get("confidence"),
+            created_at,
+        ),
+    )
+
+
+def insert_experiment_run(conn: sqlite3.Connection, run: dict[str, Any], created_at: str) -> None:
     conn.execute(
         "insert into experiment_runs values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
@@ -216,22 +239,7 @@ def seed_records(conn: sqlite3.Connection, examples_dir: Path) -> None:
             run.get("failure_type"),
             run.get("decision"),
             run.get("next_action"),
-            created_at,
-        ),
-    )
-    conn.execute(
-        "insert into problem_cases values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (
-            problem["problem_id"],
-            problem["symptom"],
-            dumps(problem.get("context", {})),
-            dumps(problem.get("suspected_causes", [])),
-            dumps(problem.get("tried_fixes", [])),
-            problem.get("final_solution"),
-            dumps(problem.get("linked_runs", [])),
-            dumps(problem.get("linked_papers", [])),
-            problem.get("confidence"),
-            created_at,
+            run.get("created_at", created_at),
         ),
     )
 

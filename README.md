@@ -56,6 +56,7 @@ Create a synthetic demo database and query it:
 
 ```powershell
 python .\scripts\init_researchkb_workspace.py
+python .\scripts\standardize_run.py .\.runtime\example-project\runs\smoke-test
 python .\scripts\seed_demo_db.py
 python .\researchkb\rk_health.py --root .\.runtime\researchkb
 python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
@@ -67,6 +68,7 @@ python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
 git clone https://github.com/drongzzz0/obsidian.git
 cd obsidian
 python scripts/init_researchkb_workspace.py
+python scripts/standardize_run.py .runtime/example-project/runs/smoke-test
 python scripts/seed_demo_db.py
 python researchkb/rk_health.py --root .runtime/researchkb
 python scripts/query_demo.py --root .runtime/researchkb latest-runs
@@ -78,6 +80,7 @@ The generated demo creates:
 - a local `.runtime/example-project/runs/smoke-test` run
 - `config/auto_harvest_paths.txt`
 - parseable `metrics.json` and `summary.json`
+- a standardized `run_record.json`
 - a synthetic `.runtime/researchkb/db/literature.sqlite` database
 
 The public demo DB contains synthetic papers, chunks, claims, evidence links, experiment runs, and failure cases. It is not your real ResearchKB.
@@ -126,6 +129,14 @@ METRIC accuracy=0.842
 METRIC latency_ms=128.5
 METRIC peak_memory_mb=9216
 ```
+
+If a project emits mixed `metrics.json`, `results.json`, `eval_results.json`, `summary.json`, or `METRIC key=value` logs, normalize one run directory before harvesting:
+
+```powershell
+python .\scripts\standardize_run.py "<ProjectRoot>\runs\<run-id>"
+```
+
+This writes `run_record.json` with normalized fields such as `run_id`, `dataset`, `model`, `sample_count`, `quality_retention`, `latency_ms`, `failure_type`, `decision`, and `next_action`.
 
 For the generic contract, see [researchkb/contracts/experiment_metrics_contract.md](researchkb/contracts/experiment_metrics_contract.md).
 For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contract.md](researchkb/contracts/kv_cache_reuse_metrics_contract.md).
@@ -178,6 +189,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
+|   |-- standardize_run.py
 |   `-- validate_examples.py
 |-- tests/
 |   |-- test_init_researchkb_workspace.py
@@ -199,6 +211,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/init_researchkb_workspace.py`: creates a local smoke workspace and prints the next health/harvest commands.
 - `scripts/seed_demo_db.py`: creates a fully synthetic demo SQLite database under `.runtime/researchkb`.
 - `scripts/query_demo.py`: queries the synthetic demo DB.
+- `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`.
 - `scripts/validate_examples.py`: validates example JSON files against schemas.
 - `scripts/public_repo_scan.py`: scans public files for local paths, secret-like values, and private traces.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.
@@ -207,6 +220,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 ## Examples
 
 - [examples/smoke-run](examples/smoke-run): minimal `metrics.json` and `summary.json` for the first ingestion test.
+- [examples/standardized-run](examples/standardized-run): synthetic normalized `run_record.json` output.
 - [examples/failure-case](examples/failure-case): a synthetic reusable failure case.
 - [examples/paper-memory](examples/paper-memory): paper, chunk, claim, and evidence-link records.
 - [examples/agent-answers](examples/agent-answers): good vs bad troubleshooting answers.
@@ -250,7 +264,7 @@ git status -sb --ignored
 ## Development Checks
 
 ```powershell
-python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py .\scripts\init_researchkb_workspace.py .\scripts\public_repo_scan.py .\scripts\seed_demo_db.py .\scripts\query_demo.py .\scripts\validate_examples.py
+python -m py_compile .\researchkb\rk_health.py .\scripts\cursor_mcp_smoke.py .\scripts\init_researchkb_workspace.py .\scripts\public_repo_scan.py .\scripts\seed_demo_db.py .\scripts\query_demo.py .\scripts\standardize_run.py .\scripts\validate_examples.py
 python -m ruff check .
 python -m pytest -vv --tb=short
 python .\scripts\validate_examples.py

@@ -17,6 +17,7 @@ This directory describes the portable ResearchKB Agent Memory contracts. It shou
 See [../examples](../examples) for synthetic records and answer examples:
 
 - `smoke-run/`: minimal experiment output.
+- `standardized-run/`: normalized synthetic run record.
 - `failure-case/`: reusable problem memory.
 - `paper-memory/`: paper, chunk, claim, and evidence-link records.
 - `agent-answers/`: good and bad troubleshooting responses.
@@ -26,6 +27,7 @@ See [../examples](../examples) for synthetic records and answer examples:
 - [../scripts/init_researchkb_workspace.py](../scripts/init_researchkb_workspace.py): create the first smoke workspace.
 - [../scripts/seed_demo_db.py](../scripts/seed_demo_db.py): seed a synthetic demo SQLite database.
 - [../scripts/query_demo.py](../scripts/query_demo.py): query latest runs, failure cases, and evidence in the demo DB.
+- [../scripts/standardize_run.py](../scripts/standardize_run.py): normalize mixed experiment outputs into `run_record.json`.
 - [../scripts/validate_examples.py](../scripts/validate_examples.py): validate example JSON files against schemas.
 - [../scripts/public_repo_scan.py](../scripts/public_repo_scan.py): run the same public hygiene scan used by CI.
 - [../.github/workflows/ci.yml](../.github/workflows/ci.yml): compile scripts, run tests, validate example JSON, and scan public files.

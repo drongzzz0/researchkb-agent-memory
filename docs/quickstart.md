@@ -21,6 +21,7 @@ If you do not have a ResearchKB directory yet, run:
 
 ```powershell
 python .\scripts\init_researchkb_workspace.py
+python .\scripts\standardize_run.py .\.runtime\example-project\runs\smoke-test
 python .\scripts\seed_demo_db.py
 ```
 
@@ -33,6 +34,7 @@ This creates local files under `.runtime/`, which is ignored by git:
 `-- example-project/
     `-- runs/smoke-test/
         |-- metrics.json
+        |-- run_record.json
         `-- summary.json
 ```
 
@@ -69,6 +71,20 @@ latest run: run_example_smoke_001
 This confirms that the synthetic demo DB is queryable. It does not contain private papers, private logs, or real experiment results.
 
 ## 4. Harvest The Smoke Run
+
+If your run output is already clean `metrics.json`, you can harvest it directly. If it is a mixed output folder with `results.json`, `summary.json`, `eval_results.json`, or logs containing `METRIC key=value`, standardize it first:
+
+```powershell
+python .\scripts\standardize_run.py "<ProjectRoot>\runs\<run-id>"
+```
+
+This writes:
+
+```text
+<ProjectRoot>\runs\<run-id>\run_record.json
+```
+
+Use `run_record.json` as the normalized artifact for ResearchKB ingestion.
 
 If your ResearchKB installation provides `rk-harvest.cmd`, run the command printed by the bootstrap script. It has this shape:
 

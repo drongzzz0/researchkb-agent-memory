@@ -5,6 +5,7 @@ These examples are synthetic. They are designed to show shape, not to represent 
 ## Contents
 
 - `smoke-run/`: a minimal experiment run with `metrics.json` and `summary.json`.
+- `standardized-run/`: a normalized `run_record.json` example produced from parseable run outputs.
 - `failure-case/`: a reusable problem case.
 - `paper-memory/`: one paper, one chunk, one claim, and one evidence link.
 - `agent-answers/`: a good evidence-grounded troubleshooting answer and a bad unsupported answer.
