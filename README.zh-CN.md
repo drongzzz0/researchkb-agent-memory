@@ -57,6 +57,7 @@ cd obsidian
 ```powershell
 python .\scripts\init_researchkb_workspace.py
 python .\scripts\standardize_run.py .\.runtime\example-project\runs\smoke-test
+python .\scripts\auto_standardize_runs.py --paths-file .\.runtime\researchkb\config\auto_harvest_paths.txt --project "Smoke Test"
 python .\scripts\seed_demo_db.py
 python .\researchkb\rk_health.py --root .\.runtime\researchkb
 python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
@@ -69,6 +70,7 @@ git clone https://github.com/drongzzz0/obsidian.git
 cd obsidian
 python scripts/init_researchkb_workspace.py
 python scripts/standardize_run.py .runtime/example-project/runs/smoke-test
+python scripts/auto_standardize_runs.py --paths-file .runtime/researchkb/config/auto_harvest_paths.txt --project "Smoke Test"
 python scripts/seed_demo_db.py
 python researchkb/rk_health.py --root .runtime/researchkb
 python scripts/query_demo.py --root .runtime/researchkb latest-runs
@@ -138,6 +140,14 @@ python .\scripts\standardize_run.py "<ProjectRoot>\runs\<run-id>"
 
 它会写出 `run_record.json`，统一包含 `run_id`、`dataset`、`model`、`sample_count`、`quality_retention`、`latency_ms`、`failure_type`、`decision` 和 `next_action` 等字段。
 
+如果想接近“无感接入”，把批量标准化器指向 watched paths：
+
+```powershell
+python .\scripts\auto_standardize_runs.py --paths-file "<ResearchKBRoot>\config\auto_harvest_paths.txt" --project "<ProjectName>"
+```
+
+把这条命令放在 ResearchKB harvest 命令前面，由 scheduled task、cron 或实验 wrapper 定期调用。新的或已变更的 run 目录会自动生成 `run_record.json`，已经是最新的目录会跳过。
+
 通用实验输出约定见 [researchkb/contracts/experiment_metrics_contract.md](researchkb/contracts/experiment_metrics_contract.md)。
 KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_contract.md](researchkb/contracts/kv_cache_reuse_metrics_contract.md)。
 
@@ -184,6 +194,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- rk-health.cmd
 |   `-- rk_health.py
 |-- scripts/
+|   |-- auto_standardize_runs.py
 |   |-- cursor_mcp_smoke.py
 |   |-- init_researchkb_workspace.py
 |   |-- public_repo_scan.py
@@ -212,6 +223,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `scripts/seed_demo_db.py`: 在 `.runtime/researchkb` 下创建完全 synthetic 的 demo SQLite 数据库。
 - `scripts/query_demo.py`: 查询 synthetic demo DB。
 - `scripts/standardize_run.py`: 把混合实验输出和 `METRIC key=value` 日志转换成 `run_record.json`。
+- `scripts/auto_standardize_runs.py`: 扫描 watched paths，增量生成缺失或过期的 `run_record.json`。
 - `scripts/validate_examples.py`: 用 schemas 校验 example JSON。
 - `scripts/public_repo_scan.py`: 扫描公开文件里的本机路径、疑似密钥和私有痕迹。
 - `scripts/cursor_mcp_smoke.py`: Cursor MCP 配置 smoke test。

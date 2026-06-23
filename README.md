@@ -57,6 +57,7 @@ Create a synthetic demo database and query it:
 ```powershell
 python .\scripts\init_researchkb_workspace.py
 python .\scripts\standardize_run.py .\.runtime\example-project\runs\smoke-test
+python .\scripts\auto_standardize_runs.py --paths-file .\.runtime\researchkb\config\auto_harvest_paths.txt --project "Smoke Test"
 python .\scripts\seed_demo_db.py
 python .\researchkb\rk_health.py --root .\.runtime\researchkb
 python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
@@ -69,6 +70,7 @@ git clone https://github.com/drongzzz0/obsidian.git
 cd obsidian
 python scripts/init_researchkb_workspace.py
 python scripts/standardize_run.py .runtime/example-project/runs/smoke-test
+python scripts/auto_standardize_runs.py --paths-file .runtime/researchkb/config/auto_harvest_paths.txt --project "Smoke Test"
 python scripts/seed_demo_db.py
 python researchkb/rk_health.py --root .runtime/researchkb
 python scripts/query_demo.py --root .runtime/researchkb latest-runs
@@ -138,6 +140,14 @@ python .\scripts\standardize_run.py "<ProjectRoot>\runs\<run-id>"
 
 This writes `run_record.json` with normalized fields such as `run_id`, `dataset`, `model`, `sample_count`, `quality_retention`, `latency_ms`, `failure_type`, `decision`, and `next_action`.
 
+For unattended capture, point the batch standardizer at your watched paths:
+
+```powershell
+python .\scripts\auto_standardize_runs.py --paths-file "<ResearchKBRoot>\config\auto_harvest_paths.txt" --project "<ProjectName>"
+```
+
+Run that command before your ResearchKB harvest command in a scheduled task, cron job, or experiment wrapper. New or stale run folders get a fresh `run_record.json`; already standardized folders are skipped.
+
 For the generic contract, see [researchkb/contracts/experiment_metrics_contract.md](researchkb/contracts/experiment_metrics_contract.md).
 For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contract.md](researchkb/contracts/kv_cache_reuse_metrics_contract.md).
 
@@ -184,6 +194,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- rk-health.cmd
 |   `-- rk_health.py
 |-- scripts/
+|   |-- auto_standardize_runs.py
 |   |-- cursor_mcp_smoke.py
 |   |-- init_researchkb_workspace.py
 |   |-- public_repo_scan.py
@@ -212,6 +223,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/seed_demo_db.py`: creates a fully synthetic demo SQLite database under `.runtime/researchkb`.
 - `scripts/query_demo.py`: queries the synthetic demo DB.
 - `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`.
+- `scripts/auto_standardize_runs.py`: scans watched paths and incrementally writes missing or stale `run_record.json` files.
 - `scripts/validate_examples.py`: validates example JSON files against schemas.
 - `scripts/public_repo_scan.py`: scans public files for local paths, secret-like values, and private traces.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.

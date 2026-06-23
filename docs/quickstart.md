@@ -22,6 +22,7 @@ If you do not have a ResearchKB directory yet, run:
 ```powershell
 python .\scripts\init_researchkb_workspace.py
 python .\scripts\standardize_run.py .\.runtime\example-project\runs\smoke-test
+python .\scripts\auto_standardize_runs.py --paths-file .\.runtime\researchkb\config\auto_harvest_paths.txt --project "Smoke Test"
 python .\scripts\seed_demo_db.py
 ```
 
@@ -85,6 +86,20 @@ This writes:
 ```
 
 Use `run_record.json` as the normalized artifact for ResearchKB ingestion.
+
+For unattended local use, standardize every watched folder before harvesting:
+
+```powershell
+python .\scripts\auto_standardize_runs.py --paths-file "<ResearchKBRoot>\config\auto_harvest_paths.txt" --project "<ProjectName>"
+```
+
+The command scans recent run folders, writes missing or stale `run_record.json` files, and skips fresh folders. Put it before your ResearchKB harvest command in a scheduled task, cron job, or experiment wrapper.
+
+Bash equivalent:
+
+```bash
+python scripts/auto_standardize_runs.py --paths-file "<ResearchKBRoot>/config/auto_harvest_paths.txt" --project "<ProjectName>"
+```
 
 If your ResearchKB installation provides `rk-harvest.cmd`, run the command printed by the bootstrap script. It has this shape:
 
