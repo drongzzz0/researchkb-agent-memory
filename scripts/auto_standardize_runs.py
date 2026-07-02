@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from standardize_run import JSON_CANDIDATES, build_run_record
+from standardize_run import JSON_CANDIDATES, build_run_record, write_failure_scaffold
 
 LOG_SUFFIXES = (".log", ".metrics.txt")
 IGNORE_DIRS = {
@@ -137,6 +137,7 @@ def standardize_one(
     record = build_run_record(run_dir=run_dir, project=project, quality_floor=quality_floor)
     if not dry_run:
         output.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        write_failure_scaffold(run_dir, record)
     status = "written"
     reason = record.get("status", "unknown")
     if dry_run:

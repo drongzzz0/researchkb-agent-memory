@@ -91,6 +91,9 @@ def main() -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"RUN_RECORD_OK {output}")
+    scaffold = write_failure_scaffold(args.run_dir, record)
+    if scaffold:
+        print(f"FAILURE_CASE_DRAFT {scaffold}")
     return 0
 
 
@@ -292,6 +295,38 @@ def derive_next_action(status: str, failure_type: str | None) -> str:
     if status == "running":
         return "Wait for completion, then standardize the final metrics."
     return "Harvest this run and use it as evidence for the next experiment decision."
+
+
+def write_failure_scaffold(run_dir: Path, record: dict[str, Any]) -> Path | None:
+    """Scaffold a problem_case draft for runs with a failure_type, so failure
+    memory gets captured while the context is still fresh. Never overwrites."""
+    if not record.get("failure_type"):
+        return None
+    draft_path = run_dir / "problem_case.draft.json"
+    if draft_path.exists():
+        return None
+    draft = {
+        "problem_id": f"problem_{record.get('run_id', 'unknown_run')}",
+        "symptom": (
+            f"Experiment '{record.get('experiment')}' ended with "
+            f"status={record.get('status')} failure_type={record.get('failure_type')}."
+        ),
+        "context": {
+            "project": record.get("project"),
+            "dataset": record.get("dataset"),
+            "model": record.get("model"),
+            "failure_type": record.get("failure_type"),
+            "generated_by": "standardize_run auto-scaffold",
+        },
+        "suspected_causes": [],
+        "tried_fixes": [],
+        "final_solution": None,
+        "linked_runs": [record.get("run_id")],
+        "linked_papers": [],
+        "confidence": None,
+    }
+    draft_path.write_text(json.dumps(draft, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return draft_path
 
 
 def ensure_public_config_ref(config_ref: str | None) -> None:

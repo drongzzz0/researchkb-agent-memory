@@ -145,7 +145,42 @@ It follows the generic experiment output contract:
 }
 ```
 
-## 5. Ask An Agent
+## 5. Connect An Agent Via MCP
+
+Register the read-only MCP server in Cursor (`~/.cursor/mcp.json`) or Claude Code (`.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "researchkb": {
+      "command": "python",
+      "args": ["<RepoRoot>/researchkb/rk_mcp_server.py", "--root", "<ResearchKBRoot>"]
+    }
+  }
+}
+```
+
+For the demo, point `--root` at `<RepoRoot>/.runtime/researchkb`. The agent gets
+`search_papers`, `search_chunks`, `search_claims`, `find_failure_cases`, `find_recent_runs`,
+`compare_runs`, and `get_health`, all read-only.
+
+Verify retrieval quality and grounding with the built-in metrics:
+
+```powershell
+python .\scripts\eval_retrieval.py --root .\.runtime\researchkb --min-recall 0.9 --min-mrr 0.75
+python .\scripts\check_citations.py .\examples\agent-answers\good_troubleshooting_answer.md --root .\.runtime\researchkb
+python .\scripts\session_brief.py --root .\.runtime\researchkb
+```
+
+Bash equivalent:
+
+```bash
+python scripts/eval_retrieval.py --root .runtime/researchkb --min-recall 0.9 --min-mrr 0.75
+python scripts/check_citations.py examples/agent-answers/good_troubleshooting_answer.md --root .runtime/researchkb
+python scripts/session_brief.py --root .runtime/researchkb
+```
+
+## 6. Ask An Agent
 
 After the smoke run is harvested, ask your agent:
 
@@ -163,7 +198,7 @@ This experiment failed. Search ResearchKB for similar failures and fixes before 
 Based on recent experiment results and paper evidence, propose the next experiment plan.
 ```
 
-## 6. Add Real Project Outputs
+## 7. Add Real Project Outputs
 
 Once the smoke run works, replace it with a real project output folder.
 
@@ -183,7 +218,7 @@ METRIC failure_type=timeout
 METRIC decision=rerun
 ```
 
-## 7. Keep Public And Private Data Separate
+## 8. Keep Public And Private Data Separate
 
 Commit templates and scripts.
 

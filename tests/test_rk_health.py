@@ -119,6 +119,48 @@ def test_health_strict_mode_requires_mature_before_usable(tmp_path: Path) -> Non
     assert strict_report["judgement"]["usable"] is False
 
 
+def test_health_effectiveness_metrics(tmp_path: Path) -> None:
+    from datetime import datetime, timezone
+
+    conn = make_db(tmp_path)
+    conn.execute("create table claims(claim_id text)")
+    conn.execute("create table evidence_links(evidence_id text)")
+    conn.execute("create table problem_cases(problem_id text, final_solution text)")
+    conn.execute("create table experiment_runs(run_id text, metrics_json text, created_at text)")
+    conn.executemany("insert into claims values (?)", [(f"claim_{i}",) for i in range(4)])
+    conn.executemany("insert into evidence_links values (?)", [(f"evidence_{i}",) for i in range(2)])
+    conn.execute("insert into problem_cases values ('problem_1', 'Documented fix.')")
+    conn.execute("insert into problem_cases values ('problem_2', null)")
+    recent = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    conn.execute("insert into experiment_runs values ('run_1', '{\"accuracy\": 0.9}', ?)", (recent,))
+    conn.commit()
+    conn.close()
+
+    report = rk_health.build_report(root=tmp_path, check_scheduled=False)
+
+    effectiveness = report["judgement"]["effectiveness"]
+    assert effectiveness["failure_documentation_rate"] == 0.5
+    assert effectiveness["evidence_density"] == 0.5
+    assert effectiveness["metrics_coverage"] == 1.0
+    assert effectiveness["run_freshness_days"] is not None
+    assert effectiveness["run_freshness_days"] < 1
+    assert any("final_solution" in action for action in report["judgement"]["next_actions"])
+
+
+def test_health_effectiveness_handles_missing_tables(tmp_path: Path) -> None:
+    conn = make_db(tmp_path)
+    conn.execute("create table experiment_runs(run_id text, metrics_json text)")
+    conn.commit()
+    conn.close()
+
+    report = rk_health.build_report(root=tmp_path, check_scheduled=False)
+
+    effectiveness = report["judgement"]["effectiveness"]
+    assert effectiveness["failure_documentation_rate"] is None
+    assert effectiveness["evidence_density"] is None
+    assert effectiveness["run_freshness_days"] is None
+
+
 def test_watch_paths_with_comments(tmp_path: Path) -> None:
     existing = tmp_path / "runs"
     existing.mkdir()

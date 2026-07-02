@@ -6,7 +6,13 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.13"]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -15,13 +21,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install test dependencies
         run: python -m pip install --upgrade pip pytest ruff jsonschema
 
       - name: Compile Python files
-        run: python -m py_compile researchkb/rk_health.py scripts/*.py
+        run: >
+          python -c "import glob, py_compile;
+          [py_compile.compile(p, doraise=True)
+          for p in glob.glob('researchkb/*.py') + glob.glob('scripts/*.py')]"
 
       - name: Ruff
         run: python -m ruff check .
@@ -31,6 +40,21 @@ jobs:
 
       - name: Validate example JSON
         run: python scripts/validate_examples.py
+
+      - name: Quickstart demo loop
+        run: |
+          python scripts/init_researchkb_workspace.py
+          python scripts/standardize_run.py .runtime/example-project/runs/smoke-test
+          python scripts/seed_demo_db.py --include-run .runtime/example-project/runs/smoke-test/run_record.json
+          python researchkb/rk_health.py --root .runtime/researchkb
+
+      - name: Retrieval effectiveness eval
+        run: python scripts/eval_retrieval.py --root .runtime/researchkb --min-recall 0.9 --min-mrr 0.75
+
+      - name: Citation validity check
+        run: >
+          python scripts/check_citations.py examples/agent-answers/good_troubleshooting_answer.md
+          --root .runtime/researchkb --min-validity 1.0
 
       - name: Public hygiene scan
         run: python scripts/public_repo_scan.py .

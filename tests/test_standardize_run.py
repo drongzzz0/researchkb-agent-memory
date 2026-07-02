@@ -66,6 +66,43 @@ def test_standardize_run_rejects_absolute_config_ref(tmp_path: Path) -> None:
         raise AssertionError("absolute config_ref should be rejected")
 
 
+def test_failure_scaffold_written_for_failed_runs(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "oom-run"
+    run_dir.mkdir(parents=True)
+    (run_dir / "run.log").write_text("CUDA out of memory\nMETRIC sample_count=10\n", encoding="utf-8")
+
+    record = standardize_run.build_run_record(run_dir)
+    scaffold_path = standardize_run.write_failure_scaffold(run_dir, record)
+
+    assert record["failure_type"] == "oom"
+    assert scaffold_path is not None
+    draft = json.loads(scaffold_path.read_text(encoding="utf-8"))
+    assert draft["problem_id"] == f"problem_{record['run_id']}"
+    assert draft["final_solution"] is None
+    assert draft["linked_runs"] == [record["run_id"]]
+    assert "oom" in draft["symptom"]
+
+    # Never overwrites an existing draft.
+    scaffold_path.write_text('{"problem_id": "edited"}', encoding="utf-8")
+    assert standardize_run.write_failure_scaffold(run_dir, record) is None
+    assert json.loads(scaffold_path.read_text(encoding="utf-8"))["problem_id"] == "edited"
+
+
+def test_failure_scaffold_skipped_for_successful_runs(tmp_path: Path) -> None:
+    run_dir = tmp_path / "runs" / "clean-run"
+    run_dir.mkdir(parents=True)
+    (run_dir / "metrics.json").write_text(
+        json.dumps({"project": "P", "experiment": "clean-run", "metrics": {"accuracy": 0.99}}),
+        encoding="utf-8",
+    )
+
+    record = standardize_run.build_run_record(run_dir)
+
+    assert record["failure_type"] is None
+    assert standardize_run.write_failure_scaffold(run_dir, record) is None
+    assert not (run_dir / "problem_case.draft.json").exists()
+
+
 def test_standardize_run_generated_id_ignores_absolute_path(tmp_path: Path) -> None:
     payload = {
         "project": "Example Project",

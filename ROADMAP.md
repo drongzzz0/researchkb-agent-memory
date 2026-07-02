@@ -32,10 +32,23 @@ This project is intended to grow from a workflow template into a small, verifiab
 - Improve metrics coverage, failure labels, decisions, and next-action fields before ingestion.
 - Keep schema migration helpers read-only or explicitly opt-in.
 
-## Phase 6: Read-Only CLI And MCP Server
+## Phase 6: Read-Only CLI And MCP Server (shipped)
 
-- Provide a read-only CLI for querying runs, failure cases, papers, claims, and evidence.
-- Provide a minimal MCP-compatible read-only server for Codex, Claude Code, Cursor, and similar tools.
+- Provide a read-only CLI for querying runs, failure cases, papers, claims, and evidence. (`scripts/query_demo.py`)
+- Provide a minimal MCP-compatible read-only server for Codex, Claude Code, Cursor, and similar tools. (`researchkb/rk_mcp_server.py`)
 - Keep write operations explicit and separate from evidence lookup.
 - Keep private data local.
-- Make evidence-grounded answers auditable.
+- Make evidence-grounded answers auditable. (`scripts/check_citations.py`)
+
+## Phase 7: Measurable Effectiveness (shipped)
+
+- Gold retrieval eval with recall@k, MRR, precision@1, and false-positive guards in CI. (`scripts/eval_retrieval.py`)
+- Library health effectiveness metrics: metrics coverage, failure documentation rate, evidence density, run freshness. (`researchkb/rk_health.py`)
+- Citation validity audit for agent answers. (`scripts/check_citations.py`)
+
+## Phase 8: Importers And Distribution
+
+- Import runs from MLflow file stores and W&B exports into `run_record.json`.
+- Seed paper metadata from Zotero or BibTeX exports.
+- Publish a pip-installable package with console entry points.
+- Register the MCP server in public MCP directories.

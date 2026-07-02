@@ -4,6 +4,12 @@ This document defines the tool behavior expected by Codex, Claude Code, Cursor, 
 
 The contracts are implementation-neutral. They can be exposed through MCP, a CLI, local Python functions, or another local API.
 
+A read-only reference implementation ships in this repository: `researchkb/rk_mcp_server.py`
+serves `search_papers`, `search_chunks`, `search_claims`, `find_failure_cases`,
+`find_recent_runs`, `compare_runs`, and `get_health` over MCP stdio, backed by
+`researchkb/rk_query.py`. Retrieval quality for these tools is measured by
+`scripts/eval_retrieval.py` against `evals/retrieval_eval.jsonl`.
+
 ## Common Output Rules
 
 Every tool that returns evidence should include:

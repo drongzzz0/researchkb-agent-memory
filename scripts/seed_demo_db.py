@@ -10,6 +10,29 @@ DEFAULT_ROOT = Path(".runtime") / "researchkb"
 EXAMPLES_DIR = Path("examples")
 DEMO_CREATED_AT = "2026-01-01T00:00:00+00:00"
 
+# Referenced by the failure-case example (linked_runs) and the good-answer
+# example, so the demo database keeps every cited source ID resolvable.
+NEGATIVE_RUN = {
+    "run_id": "run_example_negative_001",
+    "project": "Example Research Project",
+    "experiment": "reuse-only decoding quality check",
+    "status": "completed_negative",
+    "dataset": "synthetic-repeated-prefix",
+    "model": "example-model",
+    "seed": 42,
+    "config_ref": "configs/reuse-only-decoding.synthetic.json",
+    "metrics": {
+        "quality_retention": 0.71,
+        "latency_ms": 96.0,
+        "sample_count": 50,
+    },
+    "failure_type": "quality_below_threshold",
+    "decision": "redesign",
+    "next_action": "Validate prompt-template compatibility before reuse.",
+    "artifacts": ["metrics.json"],
+    "created_at": "2025-12-31T00:00:00+00:00",
+}
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Seed a synthetic ResearchKB demo SQLite database from examples/.")
@@ -150,7 +173,7 @@ def seed_records(conn: sqlite3.Connection, examples_dir: Path, include_runs: lis
     chunk = read_json(examples_dir / "paper-memory" / "chunk.json")
     claim = read_json(examples_dir / "paper-memory" / "claim.json")
     evidence = read_json(examples_dir / "paper-memory" / "evidence_link.json")
-    runs = [read_json(examples_dir / "smoke-run" / "metrics.json")]
+    runs = [read_json(examples_dir / "smoke-run" / "metrics.json"), dict(NEGATIVE_RUN)]
     standardized_run = examples_dir / "standardized-run" / "run_record.json"
     if standardized_run.exists():
         runs.append(read_json(standardized_run))

@@ -162,6 +162,8 @@ def database_status(db_path: Path) -> dict[str, Any]:
             "missing_tables": REQUIRED_TABLES,
             "counts": {},
             "run_stats": {},
+            "case_stats": {},
+            "evidence_link_count": None,
             "latest_runs": [],
         }
 
@@ -172,6 +174,8 @@ def database_status(db_path: Path) -> dict[str, Any]:
         counts = {table: count_rows(conn, table) for table in REQUIRED_TABLES if table in tables}
         missing_tables = [table for table in REQUIRED_TABLES if table not in tables]
         run_stats = experiment_run_stats(conn) if "experiment_runs" in tables else {}
+        case_stats = problem_case_stats(conn) if "problem_cases" in tables else {}
+        evidence_link_count = count_rows(conn, "evidence_links") if "evidence_links" in tables else None
         latest_runs = latest_experiment_runs(conn) if "experiment_runs" in tables else []
         return {
             "exists": True,
@@ -181,6 +185,8 @@ def database_status(db_path: Path) -> dict[str, Any]:
             "missing_tables": missing_tables,
             "counts": counts,
             "run_stats": run_stats,
+            "case_stats": case_stats,
+            "evidence_link_count": evidence_link_count,
             "latest_runs": latest_runs,
         }
     finally:
@@ -242,6 +248,14 @@ def experiment_run_stats(conn: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
+def problem_case_stats(conn: sqlite3.Connection) -> dict[str, Any]:
+    columns = table_columns(conn, "problem_cases")
+    rows = [dict(row) for row in conn.execute("select * from problem_cases").fetchall()]
+    total = len(rows)
+    documented = sum(1 for row in rows if has_nonempty_value(row, "final_solution", columns))
+    return {"total": total, "documented": documented, "open": total - documented}
+
+
 def has_nonempty_value(row: dict[str, Any], key: str, columns: set[str]) -> bool:
     if key not in columns:
         return False
@@ -286,7 +300,17 @@ def judge(report: dict[str, Any], strict: bool = False) -> dict[str, Any]:
     can_query_runs = total_runs > 0
     can_query_papers = int(counts.get("papers", 0)) > 0 and int(counts.get("chunks", 0)) > 0
     can_query_failure_cases = int(counts.get("problem_cases", 0)) > 0
-    next_actions = next_actions_for(level, db, counts, total_runs, with_metrics, existing_watch_paths, metrics_coverage)
+    effectiveness = effectiveness_metrics(db, metrics_coverage)
+    next_actions = next_actions_for(
+        level,
+        db,
+        counts,
+        total_runs,
+        with_metrics,
+        existing_watch_paths,
+        metrics_coverage,
+        effectiveness,
+    )
     return {
         "level": level,
         "usable": level in usable_levels,
@@ -295,9 +319,51 @@ def judge(report: dict[str, Any], strict: bool = False) -> dict[str, Any]:
         "can_query_failure_cases": can_query_failure_cases,
         "watch_path_count": existing_watch_paths,
         "metrics_coverage": round(metrics_coverage, 4),
+        "effectiveness": effectiveness,
         "missing_tables": db.get("missing_tables", []),
         "next_actions": next_actions,
     }
+
+
+def effectiveness_metrics(db: dict[str, Any], metrics_coverage: float) -> dict[str, Any]:
+    """Quantified effectiveness signals for the experiment- and failure-memory loop.
+
+    - metrics_coverage: fraction of runs that recorded parseable metrics.
+    - failure_documentation_rate: fraction of problem cases with a final_solution.
+    - evidence_density: evidence links per claim (provenance strength).
+    - run_freshness_days: days since the newest recorded run (staleness).
+    """
+    case_stats = db.get("case_stats", {}) or {}
+    case_total = int(case_stats.get("total") or 0)
+    documented = int(case_stats.get("documented") or 0)
+    failure_documentation_rate = round(documented / case_total, 4) if case_total else None
+
+    counts = db.get("counts", {}) or {}
+    claims = int(counts.get("claims", 0))
+    evidence_links = db.get("evidence_link_count")
+    evidence_density = round(int(evidence_links) / claims, 4) if evidence_links is not None and claims else None
+
+    run_stats = db.get("run_stats", {}) or {}
+    return {
+        "metrics_coverage": round(metrics_coverage, 4),
+        "failure_documentation_rate": failure_documentation_rate,
+        "open_failure_cases": int(case_stats.get("open") or 0) if case_total else None,
+        "evidence_density": evidence_density,
+        "run_freshness_days": days_since(run_stats.get("last_seen")),
+    }
+
+
+def days_since(timestamp: Any) -> float | None:
+    if not timestamp:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(timestamp))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    delta = datetime.now(timezone.utc) - parsed
+    return round(delta.total_seconds() / 86400, 2)
 
 
 def readiness_level(
@@ -326,8 +392,10 @@ def next_actions_for(
     with_metrics: int,
     existing_watch_paths: int,
     metrics_coverage: float,
+    effectiveness: dict[str, Any] | None = None,
 ) -> list[str]:
     actions: list[str] = []
+    effectiveness = effectiveness or {}
     if not db.get("exists"):
         actions.append("Create or point --root to a ResearchKB directory containing db/literature.sqlite.")
     if db.get("missing_tables"):
@@ -342,6 +410,8 @@ def next_actions_for(
         actions.append("Ingest at least one paper batch or Zotero export to enable literature queries.")
     if level in ("smoke", "usable") and metrics_coverage < 0.7:
         actions.append("Increase metrics coverage by emitting metrics.json or METRIC key=value for more runs.")
+    if effectiveness.get("open_failure_cases"):
+        actions.append("Document final_solution for open problem cases to make failure memory reusable.")
     if not actions:
         actions.append("No immediate action required.")
     return actions

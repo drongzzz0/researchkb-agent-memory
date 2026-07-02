@@ -1,0 +1,16 @@
+{"id": "papers_cache_safety", "tool": "search_papers", "query": "cache reuse safety", "expected_source_ids": ["paper_example_cache_001"], "k": 5}
+{"id": "papers_serving_study", "tool": "search_papers", "query": "language model serving synthetic study", "expected_source_ids": ["paper_example_cache_001"], "k": 5}
+{"id": "papers_tag_llm_serving", "tool": "search_papers", "query": "llm-serving", "expected_source_ids": ["paper_example_cache_001"], "k": 5}
+{"id": "papers_negative_guard", "tool": "search_papers", "query": "quantum entanglement teleportation", "expected_source_ids": [], "k": 5}
+{"id": "chunks_template_compat", "tool": "search_chunks", "query": "prompt template compatibility validation", "expected_source_ids": ["chunk_example_cache_001"], "k": 5}
+{"id": "chunks_cached_state", "tool": "search_chunks", "query": "cached state before reuse", "expected_source_ids": ["chunk_example_cache_001"], "k": 5}
+{"id": "chunks_negative_guard", "tool": "search_chunks", "query": "kubernetes ingress webhook", "expected_source_ids": [], "k": 5}
+{"id": "claims_validate_before_reuse", "tool": "search_claims", "query": "validate prompt-template compatibility", "expected_source_ids": ["claim_example_cache_001"], "k": 5}
+{"id": "claims_safety_reuse", "tool": "search_claims", "query": "safety cache reuse", "expected_source_ids": ["claim_example_cache_001"], "k": 5}
+{"id": "failures_quality_drop", "tool": "find_failure_cases", "query": "quality drops after enabling cache reuse", "expected_source_ids": ["problem_example_cache_template_mismatch"], "k": 5}
+{"id": "failures_hash_fix", "tool": "find_failure_cases", "query": "prompt-template hash validation", "expected_source_ids": ["problem_example_cache_template_mismatch"], "k": 5}
+{"id": "failures_incompatible_contexts", "tool": "find_failure_cases", "query": "template mismatch incompatible contexts", "expected_source_ids": ["problem_example_cache_template_mismatch"], "k": 5}
+{"id": "failures_negative_guard", "tool": "find_failure_cases", "query": "disk quota exceeded nfs mount", "expected_source_ids": [], "k": 5}
+{"id": "evidence_compatibility", "tool": "search_evidence", "query": "validate compatibility cached state", "expected_source_ids": ["evidence_example_cache_001"], "k": 5}
+{"id": "runs_latest", "tool": "find_recent_runs", "arguments": {"limit": 5}, "expected_source_ids": ["run_example_smoke_001", "run_example_standardized_001", "run_example_negative_001"], "k": 5}
+{"id": "runs_filter_negative_status", "tool": "find_recent_runs", "arguments": {"status": "completed_negative"}, "expected_source_ids": ["run_example_standardized_001", "run_example_negative_001"], "k": 5}

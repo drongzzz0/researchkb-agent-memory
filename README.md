@@ -93,6 +93,75 @@ python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --projec
 
 See [docs/quickstart.md](docs/quickstart.md) for the full 10-minute loop.
 
+## Read-Only MCP Server
+
+Agents can query ResearchKB directly through a stdlib-only MCP server. It opens the SQLite
+database in read-only mode, builds an in-memory FTS5 index, and implements the tool contracts
+from [docs/agent_tool_contracts.md](docs/agent_tool_contracts.md):
+
+`search_papers`, `search_chunks`, `search_claims`, `find_failure_cases`, `find_recent_runs`,
+`compare_runs`, `get_health`.
+
+Register it in Cursor (`~/.cursor/mcp.json`) or Claude Code (`.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "researchkb": {
+      "command": "python",
+      "args": ["<RepoRoot>/researchkb/rk_mcp_server.py", "--root", "<ResearchKBRoot>"]
+    }
+  }
+}
+```
+
+Every tool result carries `source_type`, `source_id`, `locator`, `snippet`, and `confidence`,
+plus `missing_context` and `warnings`, so agent answers stay auditable. The server never
+writes to the database.
+
+For a session-start context block (recent runs, open failure cases, next actions):
+
+```powershell
+python .\scripts\session_brief.py --root "<ResearchKBRoot>"
+```
+
+## Measuring Effectiveness
+
+The kit ships three quantified metric layers so "is this memory system working" is a number,
+not a feeling:
+
+1. **Retrieval quality** (CI-gated): `scripts/eval_retrieval.py` runs the gold query set in
+   [evals/retrieval_eval.jsonl](evals/retrieval_eval.jsonl) and reports `recall_at_k`, `mrr`,
+   `precision_at_1`, `guard_pass_rate` (false-positive guards), and `avg_latency_ms`.
+
+```powershell
+python .\scripts\eval_retrieval.py --root .\.runtime\researchkb --min-recall 0.9 --min-mrr 0.75
+```
+
+2. **Library health** (`rk_health.py` judgement.effectiveness): `metrics_coverage`,
+   `failure_documentation_rate`, `open_failure_cases`, `evidence_density`, and
+   `run_freshness_days` quantify how complete and current the memory is.
+
+3. **Answer grounding**: `scripts/check_citations.py` extracts cited source IDs from an agent
+   answer and verifies each against the database, reporting `citation_validity`.
+
+```powershell
+python .\scripts\check_citations.py answer.md --root "<ResearchKBRoot>" --min-validity 1.0
+```
+
+## How This Compares To Similar Tools
+
+| Tool | What it covers | What this kit adds |
+| --- | --- | --- |
+| Mem0, Zep, Letta | General conversational agent memory | Typed research records: runs, failure cases, claims with provenance |
+| Engram-style SQLite memory servers | Local-first generic lessons | Research schema plus experiment/literature/failure join |
+| W&B / MLflow MCP servers | Experiment runs and traces | Local-first, platform-free, joined with papers and failure memory |
+| zotero-mcp, paper-search-mcp | Literature search | Experiment and failure memory linked to paper evidence |
+| InternAgent memory module | Framework-internal experiment memory | Portable contracts any agent stack can query via MCP |
+
+The niche: one local, private, auditable evidence store where literature claims, experiment
+runs, and failure cases answer questions together.
+
 ## How To Use With Agents
 
 Use direct prompts like these:
@@ -165,19 +234,18 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |-- assets/
 |   `-- readme-workflow-v2.png
 |-- docs/
+|   |-- README.md
 |   |-- quickstart.md
 |   |-- architecture.md
 |   |-- schema_minimal.md
 |   `-- agent_tool_contracts.md
+|-- evals/
+|   `-- retrieval_eval.jsonl
 |-- schemas/
-|   |-- experiment_metrics.schema.json
-|   |-- problem_case.schema.json
-|   |-- paper.schema.json
-|   |-- chunk.schema.json
-|   |-- claim.schema.json
-|   `-- evidence_link.schema.json
+|   `-- 6 JSON Schemas (papers, chunks, claims, evidence links, metrics, problem cases)
 |-- examples/
 |   |-- smoke-run/
+|   |-- standardized-run/
 |   |-- failure-case/
 |   |-- paper-memory/
 |   `-- agent-answers/
@@ -190,23 +258,23 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- auto_harvest_paths.example.txt
 |   |-- kv_experiment_metrics_contract.md
 |   |-- rk-health.cmd
-|   `-- rk_health.py
+|   |-- rk_health.py
+|   |-- rk_query.py
+|   `-- rk_mcp_server.py
 |-- scripts/
 |   |-- auto_standardize_runs.py
+|   |-- check_citations.py
 |   |-- cursor_mcp_smoke.py
+|   |-- eval_retrieval.py
 |   |-- init_researchkb_workspace.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
+|   |-- session_brief.py
 |   |-- standardize_run.py
 |   `-- validate_examples.py
 |-- tests/
-|   |-- test_auto_standardize_runs.py
-|   |-- test_init_researchkb_workspace.py
-|   |-- test_quickstart_demo.py
-|   |-- test_public_repo_scan.py
-|   |-- test_standardize_run.py
-|   `-- test_rk_health.py
+|   `-- pytest suites for every helper above
 |-- .gitignore
 |-- .public-scan-local.example.txt
 |-- README.zh-CN.md
@@ -215,6 +283,8 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 
 ## Included Helpers
 
+- `researchkb/rk_mcp_server.py`: read-only MCP server exposing evidence tools to Codex, Claude Code, and Cursor.
+- `researchkb/rk_query.py`: shared read-only query engine with in-memory FTS5 indexing and LIKE fallback.
 - `researchkb/rk-health.cmd`: checks ResearchKB, watched paths, logs, and recent experiment-memory coverage.
 - `researchkb/auto_harvest_paths.example.txt`: safe watch-list template.
 - `researchkb/contracts/experiment_metrics_contract.md`: generic experiment output contract.
@@ -223,8 +293,11 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/init_researchkb_workspace.py`: creates a local smoke workspace and prints the next health/harvest commands.
 - `scripts/seed_demo_db.py`: creates a fully synthetic demo SQLite database under `.runtime/researchkb` and can include a generated `run_record.json`.
 - `scripts/query_demo.py`: queries the synthetic demo DB.
-- `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`.
+- `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`, and scaffolds a `problem_case.draft.json` for failed runs.
 - `scripts/auto_standardize_runs.py`: scans watched paths and incrementally writes missing or stale `run_record.json` files.
+- `scripts/session_brief.py`: compact session-start brief with recent runs, open failure cases, and effectiveness metrics.
+- `scripts/eval_retrieval.py`: retrieval-quality eval (recall@k, MRR, precision@1, guard pass rate) against a gold query set.
+- `scripts/check_citations.py`: verifies source IDs cited in an agent answer against the database.
 - `scripts/validate_examples.py`: validates example JSON files against schemas.
 - `scripts/public_repo_scan.py`: scans public files for local paths, secret-like values, and private traces.
 - `scripts/cursor_mcp_smoke.py`: lightweight Cursor MCP config smoke test.

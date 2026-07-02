@@ -30,7 +30,16 @@ See [../examples](../examples) for synthetic records and answer examples:
 - [../scripts/standardize_run.py](../scripts/standardize_run.py): normalize mixed experiment outputs into `run_record.json`.
 - [../scripts/validate_examples.py](../scripts/validate_examples.py): validate example JSON files against schemas.
 - [../scripts/public_repo_scan.py](../scripts/public_repo_scan.py): run the same public hygiene scan used by CI.
-- [../.github/workflows/ci.yml](../.github/workflows/ci.yml): compile scripts, run tests, validate example JSON, and scan public files.
+- [../.github/workflows/ci.yml](../.github/workflows/ci.yml): compile scripts, run tests, validate example JSON, run the retrieval eval, and scan public files.
+
+## Agent Access And Effectiveness
+
+- [../researchkb/rk_mcp_server.py](../researchkb/rk_mcp_server.py): read-only MCP server implementing the agent tool contracts.
+- [../researchkb/rk_query.py](../researchkb/rk_query.py): shared read-only query engine (FTS5 with LIKE fallback).
+- [../scripts/session_brief.py](../scripts/session_brief.py): session-start brief with recent runs and open failure cases.
+- [../evals/retrieval_eval.jsonl](../evals/retrieval_eval.jsonl): gold query set for retrieval metrics.
+- [../scripts/eval_retrieval.py](../scripts/eval_retrieval.py): recall@k, MRR, precision@1, and guard pass rate.
+- [../scripts/check_citations.py](../scripts/check_citations.py): citation validity audit for agent answers.
 
 ## Private Logs Are Not Tracked
 
