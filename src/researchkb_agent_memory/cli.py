@@ -13,7 +13,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from . import __version__, autostandardize, brief, citations, demo, health, mcp, standardize, workspace
+from . import __version__, autostandardize, brief, citations, demo, health, import_runs, mcp, standardize, workspace
 from . import eval as retrieval_eval
 from .query import QueryEngine
 
@@ -83,6 +83,7 @@ COMMANDS: dict[str, tuple[Callable[[list[str]], int], str]] = {
     "seed-demo": (demo.main, "Create the synthetic demo database from examples/."),
     "standardize-run": (standardize.main, "Normalize one run directory into run_record.json."),
     "auto-standardize": (autostandardize.main, "Batch-standardize watched experiment folders."),
+    "import-runs": (import_runs.main, "Import run_record.json files into experiment_runs."),
     "health": (health.main, "Report readiness level and effectiveness metrics."),
     "session-brief": (brief.main, "Emit a compact session-start brief."),
     "search-papers": (_query_command("search-papers"), "Search paper metadata."),

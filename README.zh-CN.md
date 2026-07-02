@@ -60,8 +60,8 @@ rk-memory latest-runs --root .runtime/researchkb
 rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
-`rk-memory --help` 可以看到全部命令（检索、失败案例、运行对比、评测、引用校验、
-会话简报、MCP server）。
+`rk-memory --help` 可以看到全部命令（run 导入、检索、失败案例、运行对比、评测、
+引用校验、会话简报、MCP server）。
 
 不想安装的话，所有功能仍可用脚本方式运行，例如
 `python scripts/init_researchkb_workspace.py`、`python scripts/standardize_run.py <run-dir>`、
@@ -83,6 +83,13 @@ demo 跑通后，再接入你自己的私有 ResearchKB：
 
 ```powershell
 rk-memory init --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
+```
+
+如果要把标准化后的 runs 导入已有的私有 ResearchKB SQLite 数据库，先预览，再显式写入：
+
+```powershell
+rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>"
+rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>" --write
 ```
 
 完整 10 分钟闭环见 [docs/quickstart.md](docs/quickstart.md)。
@@ -275,6 +282,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- cursor_mcp_smoke.py
 |   |-- eval_retrieval.py
 |   |-- init_researchkb_workspace.py
+|   |-- import_runs.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
@@ -302,6 +310,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `scripts/init_researchkb_workspace.py`: 创建本地 smoke workspace，并打印下一步 health/harvest 命令。
 - `scripts/seed_demo_db.py`: 在 `.runtime/researchkb` 下创建完全 synthetic 的 demo SQLite 数据库，也可以 include 生成出的 `run_record.json`。
 - `scripts/query_demo.py`: 查询 synthetic demo DB。
+- `scripts/import_runs.py`: dry-run 优先的 `run_record.json` 导入器；只有显式 `--write` 才写库。
 - `scripts/standardize_run.py`: 把混合实验输出和 `METRIC key=value` 日志转换成 `run_record.json`，失败 run 自动生成 `problem_case.draft.json` 草稿。
 - `scripts/auto_standardize_runs.py`: 扫描 watched paths，增量生成缺失或过期的 `run_record.json`。
 - `scripts/session_brief.py`: 会话开始简报，含最近 runs、未解决失败案例和有效性指标。

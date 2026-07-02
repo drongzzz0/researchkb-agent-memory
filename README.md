@@ -60,8 +60,8 @@ rk-memory latest-runs --root .runtime/researchkb
 rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
-Run `rk-memory --help` for the full command list (search, failure cases, run comparison,
-eval, citation check, session brief, MCP server).
+Run `rk-memory --help` for the full command list (run import, search, failure cases,
+run comparison, eval, citation check, session brief, MCP server).
 
 Prefer not to install? Every command also works as a plain script, e.g.
 `python scripts/init_researchkb_workspace.py`, `python scripts/standardize_run.py <run-dir>`,
@@ -83,6 +83,14 @@ After the demo works, point the scripts at your private ResearchKB installation:
 
 ```powershell
 python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
+```
+
+To import standardized runs into an existing private ResearchKB SQLite database, preview first,
+then write explicitly:
+
+```powershell
+rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>"
+rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>" --write
 ```
 
 See [docs/quickstart.md](docs/quickstart.md) for the full 10-minute loop.
@@ -279,6 +287,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- cursor_mcp_smoke.py
 |   |-- eval_retrieval.py
 |   |-- init_researchkb_workspace.py
+|   |-- import_runs.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
@@ -306,6 +315,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/init_researchkb_workspace.py`: creates a local smoke workspace and prints the next health/harvest commands.
 - `scripts/seed_demo_db.py`: creates a fully synthetic demo SQLite database under `.runtime/researchkb` and can include a generated `run_record.json`.
 - `scripts/query_demo.py`: queries the synthetic demo DB.
+- `scripts/import_runs.py`: dry-run-first importer for `run_record.json` files; writes require explicit `--write`.
 - `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`, and scaffolds a `problem_case.draft.json` for failed runs.
 - `scripts/auto_standardize_runs.py`: scans watched paths and incrementally writes missing or stale `run_record.json` files.
 - `scripts/session_brief.py`: compact session-start brief with recent runs, open failure cases, and effectiveness metrics.

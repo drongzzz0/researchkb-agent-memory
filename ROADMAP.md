@@ -48,6 +48,7 @@ This project is intended to grow from a workflow template into a small, verifiab
 
 ## Phase 8: Importers And Distribution
 
+- Import standardized `run_record.json` files into `experiment_runs`. (unreleased: `rk-memory import-runs`)
 - Import runs from MLflow file stores and W&B exports into `run_record.json`.
 - Seed paper metadata from Zotero or BibTeX exports.
 - Publish a pip-installable package with console entry points. (local install shipped in v0.3.0: `pip install -e .` provides `rk-memory`; PyPI publication pending)

@@ -122,6 +122,10 @@ def test_end_to_end_workflow(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     assert code == 0
     assert json.loads(out)["level"] == "smoke"
 
+    code, out = run_cli(capsys, "import-runs", str(run_dir / "run_record.json"), "--root", str(root))
+    assert code == 0
+    assert json.loads(out)["would_update"] == 1
+
 
 def test_find_failure_cases_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     root = tmp_path / "researchkb"

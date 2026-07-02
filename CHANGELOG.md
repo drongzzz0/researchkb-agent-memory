@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Added `docs/project_status.md` and `docs/project_status.zh-CN.md`: periodic progress snapshot with quality numbers, known limitations, and the v0.4-v0.6 plan.
+- Added `rk-memory import-runs`: explicit dry-run-first importer for validated `run_record.json` files into `experiment_runs`, with `--write` upsert by `run_id`.
 
 ## v0.3.0 - 2026-07-02
 

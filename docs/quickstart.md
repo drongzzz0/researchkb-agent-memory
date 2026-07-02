@@ -127,6 +127,19 @@ It follows the generic experiment output contract:
 }
 ```
 
+If your ResearchKB root already has `db/literature.sqlite` with the `experiment_runs`
+table, you can import standardized run records directly. Preview first:
+
+```powershell
+rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>"
+```
+
+Then write explicitly:
+
+```powershell
+rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>" --write
+```
+
 ## 5. Connect An Agent Via MCP
 
 Register the read-only MCP server in Cursor (`~/.cursor/mcp.json`) or Claude Code (`.mcp.json`):
