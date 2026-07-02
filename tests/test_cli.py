@@ -70,6 +70,10 @@ def test_end_to_end_workflow(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     report = json.loads(out)
     assert report["judgement"]["level"] == "smoke"
 
+    code, out = run_cli(capsys, "schema-check", "--root", str(root))
+    assert code == 0
+    assert json.loads(out)["ok"] is True
+
     code, out = run_cli(capsys, "latest-runs", "--root", str(root), "--limit", "3")
     assert code == 0
     runs = json.loads(out)["runs"]

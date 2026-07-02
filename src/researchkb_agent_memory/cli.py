@@ -24,6 +24,7 @@ from . import (
     import_notes,
     import_runs,
     mcp,
+    schema_check,
     standardize,
     workspace,
 )
@@ -99,6 +100,7 @@ COMMANDS: dict[str, tuple[Callable[[list[str]], int], str]] = {
     "import-runs": (import_runs.main, "Import run_record.json files into experiment_runs."),
     "import-bibtex": (import_bibtex.main, "Import BibTeX paper metadata into papers."),
     "import-notes": (import_notes.main, "Import curated Markdown notes into chunks, claims, and evidence."),
+    "schema-check": (schema_check.main, "Check SQLite schema readiness for write-capable importers."),
     "health": (health.main, "Report readiness level and effectiveness metrics."),
     "session-brief": (brief.main, "Emit a compact session-start brief."),
     "search-papers": (_query_command("search-papers"), "Search paper metadata."),

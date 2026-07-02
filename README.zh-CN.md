@@ -61,7 +61,7 @@ rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
 `rk-memory --help` 可以看到全部命令（run 导入、BibTeX 元数据导入、Markdown 笔记导入、
-检索、失败案例、运行对比、评测、引用校验、会话简报、MCP server）。
+检索、失败案例、运行对比、评测、引用校验、schema 检查、会话简报、MCP server）。
 
 不想安装的话，所有功能仍可用脚本方式运行，例如
 `python scripts/init_researchkb_workspace.py`、`python scripts/standardize_run.py <run-dir>`、
@@ -83,6 +83,12 @@ demo 跑通后，再接入你自己的私有 ResearchKB：
 
 ```powershell
 rk-memory init --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
+```
+
+任何会写库的导入命令之前，先检查你的私有 SQLite 数据库是否具备预期表和字段：
+
+```powershell
+rk-memory schema-check --root "<ResearchKBRoot>"
 ```
 
 如果要把标准化后的 runs 导入已有的私有 ResearchKB SQLite 数据库，先预览，再显式写入：
@@ -309,6 +315,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- import_notes.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
+|   |-- schema_check.py
 |   |-- seed_demo_db.py
 |   |-- session_brief.py
 |   |-- standardize_run.py
@@ -337,6 +344,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `scripts/import_runs.py`: dry-run 优先的 `run_record.json` 导入器；只有显式 `--write` 才写库。
 - `scripts/import_bibtex.py`: dry-run 优先的 BibTeX/Zotero 论文元数据导入器；只有显式 `--write` 才写库，且不会复制 PDF。
 - `scripts/import_notes.py`: dry-run 优先的 curated Markdown 笔记导入器；只有显式 `--write` 才写入 chunks、claims 和 evidence links。
+- `scripts/schema_check.py`: 只读检查 SQLite 表和字段是否满足写入型 importer 的要求。
 - `scripts/standardize_run.py`: 把混合实验输出和 `METRIC key=value` 日志转换成 `run_record.json`，失败 run 自动生成 `problem_case.draft.json` 草稿。
 - `scripts/auto_standardize_runs.py`: 扫描 watched paths，增量生成缺失或过期的 `run_record.json`。
 - `scripts/session_brief.py`: 会话开始简报，含最近 runs、未解决失败案例和有效性指标。

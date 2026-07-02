@@ -62,7 +62,7 @@ rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 
 Run `rk-memory --help` for the full command list (run import, BibTeX metadata import,
 Markdown note import, search, failure cases, run comparison, eval, citation check,
-session brief, MCP server).
+schema check, session brief, MCP server).
 
 Prefer not to install? Every command also works as a plain script, e.g.
 `python scripts/init_researchkb_workspace.py`, `python scripts/standardize_run.py <run-dir>`,
@@ -84,6 +84,13 @@ After the demo works, point the scripts at your private ResearchKB installation:
 
 ```powershell
 python .\scripts\init_researchkb_workspace.py --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
+```
+
+Before any write-capable import, check that your private SQLite database has the expected
+tables and columns:
+
+```powershell
+rk-memory schema-check --root "<ResearchKBRoot>"
 ```
 
 To import standardized runs into an existing private ResearchKB SQLite database, preview first,
@@ -315,6 +322,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- import_notes.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
+|   |-- schema_check.py
 |   |-- seed_demo_db.py
 |   |-- session_brief.py
 |   |-- standardize_run.py
@@ -343,6 +351,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/import_runs.py`: dry-run-first importer for `run_record.json` files; writes require explicit `--write`.
 - `scripts/import_bibtex.py`: dry-run-first importer for BibTeX/Zotero paper metadata; writes require explicit `--write` and never copy PDFs.
 - `scripts/import_notes.py`: dry-run-first importer for curated Markdown notes; writes chunks, claims, and evidence links only with explicit `--write`.
+- `scripts/schema_check.py`: read-only table/column readiness check before running write-capable importers.
 - `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`, and scaffolds a `problem_case.draft.json` for failed runs.
 - `scripts/auto_standardize_runs.py`: scans watched paths and incrementally writes missing or stale `run_record.json` files.
 - `scripts/session_brief.py`: compact session-start brief with recent runs, open failure cases, and effectiveness metrics.

@@ -59,6 +59,7 @@ rk-memory init --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
 
 ```bash
 rk-memory health --root .runtime/researchkb
+rk-memory schema-check --root .runtime/researchkb
 rk-memory latest-runs --root .runtime/researchkb
 rk-memory find-failure-cases "cache" --root .runtime/researchkb
 rk-memory search-evidence "compatibility" --root .runtime/researchkb
@@ -73,7 +74,7 @@ database: present
 latest run: run_smoke_001
 ```
 
-This confirms that the synthetic demo DB is queryable and includes the freshly standardized smoke run. It does not contain private papers, private logs, or real experiment results.
+This confirms that the synthetic demo DB is queryable, has the tables needed by write-capable importers, and includes the freshly standardized smoke run. It does not contain private papers, private logs, or real experiment results.
 
 ## 4. Harvest The Smoke Run
 
@@ -128,7 +129,13 @@ It follows the generic experiment output contract:
 ```
 
 If your ResearchKB root already has `db/literature.sqlite` with the `experiment_runs`
-table, you can import standardized run records directly. Preview first:
+table, you can import standardized run records directly. Check schema first:
+
+```powershell
+rk-memory schema-check --root "<ResearchKBRoot>"
+```
+
+Then preview:
 
 ```powershell
 rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>"

@@ -6,6 +6,7 @@
 - Added `rk-memory import-runs`: explicit dry-run-first importer for validated `run_record.json` files into `experiment_runs`, with `--write` upsert by `run_id`.
 - Added `rk-memory import-bibtex`: explicit dry-run-first importer for BibTeX paper metadata into `papers`, with synthetic demo data and no PDF copying.
 - Added `rk-memory import-notes`: explicit dry-run-first importer for curated Markdown notes into `chunks`, `claims`, and `evidence_links`.
+- Added `rk-memory schema-check`: read-only SQLite table/column readiness check before running write-capable importers.
 
 ## v0.3.0 - 2026-07-02
 
