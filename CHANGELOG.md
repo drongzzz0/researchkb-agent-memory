@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.1 - 2026-07-02
+
+- Added `search_evidence` to the MCP server so the core provenance lookup is callable by agents, with tests.
+- Split the agent tool contracts into implemented reference tools and planned/composite tools, and added the `search_evidence` contract.
+- Added `docs/tool_matrix.md` (per-surface implementation status) and `docs/mcp_compatibility.md` (transport, protocol version, tested clients, security boundary, known limitations).
+- Added `evals/README.md` explaining how to write user-specific eval sets, and documented that the bundled eval set is synthetic and validates the demo workflow only.
+- Marked the similar-tools table as a scope comparison, not a benchmark.
+
 ## v0.2.0 - 2026-07-02
 
 - Renamed the repository from `obsidian` to `researchkb-agent-memory`; old GitHub URLs redirect automatically.

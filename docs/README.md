@@ -8,6 +8,8 @@ This directory describes the portable ResearchKB Agent Memory contracts. It shou
 - [quickstart.md](quickstart.md): 10-minute first-run loop.
 - [schema_minimal.md](schema_minimal.md): minimal schema for papers, claims, runs, failure cases, and evidence links.
 - [agent_tool_contracts.md](agent_tool_contracts.md): expected tool inputs and outputs for agents.
+- [tool_matrix.md](tool_matrix.md): implemented vs planned tools across engine, CLI, MCP, and evals.
+- [mcp_compatibility.md](mcp_compatibility.md): MCP transport, protocol version, tested clients, and security boundary.
 - [../researchkb/contracts/experiment_metrics_contract.md](../researchkb/contracts/experiment_metrics_contract.md): generic experiment output contract.
 - [../researchkb/contracts/kv_cache_reuse_metrics_contract.md](../researchkb/contracts/kv_cache_reuse_metrics_contract.md): KV-cache reuse metric and safety extension.
 - [../schemas](../schemas): machine-checkable JSON Schemas for synthetic examples.

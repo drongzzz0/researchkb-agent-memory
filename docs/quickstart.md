@@ -161,8 +161,9 @@ Register the read-only MCP server in Cursor (`~/.cursor/mcp.json`) or Claude Cod
 ```
 
 For the demo, point `--root` at `<RepoRoot>/.runtime/researchkb`. The agent gets
-`search_papers`, `search_chunks`, `search_claims`, `find_failure_cases`, `find_recent_runs`,
-`compare_runs`, and `get_health`, all read-only.
+`search_papers`, `search_chunks`, `search_claims`, `search_evidence`, `find_failure_cases`,
+`find_recent_runs`, `compare_runs`, and `get_health`, all read-only. Coverage and
+compatibility details: [tool_matrix.md](tool_matrix.md), [mcp_compatibility.md](mcp_compatibility.md).
 
 Verify retrieval quality and grounding with the built-in metrics:
 

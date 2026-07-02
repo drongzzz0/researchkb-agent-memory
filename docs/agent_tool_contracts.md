@@ -4,11 +4,31 @@ This document defines the tool behavior expected by Codex, Claude Code, Cursor, 
 
 The contracts are implementation-neutral. They can be exposed through MCP, a CLI, local Python functions, or another local API.
 
+## Implementation Status
+
 A read-only reference implementation ships in this repository: `researchkb/rk_mcp_server.py`
-serves `search_papers`, `search_chunks`, `search_claims`, `find_failure_cases`,
-`find_recent_runs`, `compare_runs`, and `get_health` over MCP stdio, backed by
-`researchkb/rk_query.py`. Retrieval quality for these tools is measured by
-`scripts/eval_retrieval.py` against `evals/retrieval_eval.jsonl`.
+serves the implemented tools below over MCP stdio, backed by `researchkb/rk_query.py`.
+Retrieval quality is measured by `scripts/eval_retrieval.py` against
+`evals/retrieval_eval.jsonl`. See [tool_matrix.md](tool_matrix.md) for the per-surface
+coverage table.
+
+Implemented reference tools:
+
+- `search_papers`
+- `search_chunks`
+- `search_claims`
+- `search_evidence`
+- `find_failure_cases`
+- `find_recent_runs`
+- `compare_runs`
+- `get_health`
+
+Planned/composite tools (contract only, **not** served by the MCP reference implementation yet;
+agents can compose them from the implemented tools):
+
+- `find_methods`
+- `find_limitations`
+- `suggest_next_experiment`
 
 ## Common Output Rules
 
@@ -27,17 +47,19 @@ Every tool should also return:
 
 ## Tool Index
 
-| Tool | Purpose |
-| --- | --- |
-| `search_papers` | Find paper metadata by topic, title, author, tag, or year |
-| `search_chunks` | Retrieve source text chunks |
-| `search_claims` | Retrieve structured claims |
-| `find_methods` | Find methods for a topic or problem |
-| `find_limitations` | Find limitations and failure modes |
-| `find_failure_cases` | Find similar historical failures |
-| `find_recent_runs` | Retrieve recent experiment runs |
-| `compare_runs` | Compare metrics or decisions across runs |
-| `suggest_next_experiment` | Propose next experiment plan from runs and literature |
+| Tool | Purpose | Status |
+| --- | --- | --- |
+| `search_papers` | Find paper metadata by topic, title, author, tag, or year | implemented |
+| `search_chunks` | Retrieve source text chunks | implemented |
+| `search_claims` | Retrieve structured claims | implemented |
+| `search_evidence` | Retrieve evidence links plus matching chunks for citation-ready provenance | implemented |
+| `find_failure_cases` | Find similar historical failures | implemented |
+| `find_recent_runs` | Retrieve recent experiment runs | implemented |
+| `compare_runs` | Compare metrics or decisions across runs | implemented |
+| `get_health` | Report readiness level and effectiveness metrics | implemented |
+| `find_methods` | Find methods for a topic or problem | planned |
+| `find_limitations` | Find limitations and failure modes | planned |
+| `suggest_next_experiment` | Propose next experiment plan from runs and literature | planned |
 
 ## Contracts
 
@@ -138,6 +160,50 @@ Output:
       "locator": "paper_example_001:section:Evaluation",
       "snippet": "Evaluation reports lower time to first token for repeated prefixes.",
       "confidence": 0.81
+    }
+  ],
+  "missing_context": [],
+  "warnings": []
+}
+```
+
+### `search_evidence`
+
+Input:
+
+```json
+{
+  "query": "validate compatibility cached state",
+  "limit": 10
+}
+```
+
+Output:
+
+```json
+{
+  "evidence_links": [
+    {
+      "evidence_id": "evidence_example_001",
+      "paper_id": "paper_example_001",
+      "chunk_id": "chunk_example_001",
+      "source_type": "chunk",
+      "source_id": "chunk_example_001",
+      "locator": "section:Safety Discussion",
+      "snippet": "cache reuse should validate compatibility between the cached state and the current prompt template",
+      "confidence": 0.86
+    }
+  ],
+  "chunks": [
+    {
+      "chunk_id": "chunk_example_001",
+      "paper_id": "paper_example_001",
+      "section": "Safety Discussion",
+      "source_type": "chunk",
+      "source_id": "chunk_example_001",
+      "locator": "section:Safety Discussion",
+      "snippet": "This synthetic paper notes that cache reuse should validate compatibility...",
+      "confidence": 0.9
     }
   ],
   "missing_context": [],

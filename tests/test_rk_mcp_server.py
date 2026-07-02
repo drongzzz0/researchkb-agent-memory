@@ -57,6 +57,7 @@ def test_initialize_and_tools_list(demo_root: Path) -> None:
         "search_papers",
         "search_chunks",
         "search_claims",
+        "search_evidence",
         "find_failure_cases",
         "find_recent_runs",
         "compare_runs",
@@ -83,6 +84,22 @@ def test_tool_calls_return_contract_payloads(demo_root: Path) -> None:
     assert cases["cases"][0]["problem_id"] == "problem_example_cache_template_mismatch"
     assert len(runs["runs"]) == 2
     assert "effectiveness" in health["judgement"]
+
+
+def test_search_evidence_tool_returns_links_and_chunks(demo_root: Path) -> None:
+    server = rk_mcp_server.McpServer(demo_root)
+
+    payload = tool_payload(
+        call(
+            server,
+            "tools/call",
+            {"name": "search_evidence", "arguments": {"query": "validate compatibility cached state"}},
+        )
+    )
+
+    assert payload["evidence_links"][0]["evidence_id"] == "evidence_example_cache_001"
+    assert payload["evidence_links"][0]["locator"] == "section:Safety Discussion"
+    assert payload["chunks"][0]["chunk_id"] == "chunk_example_cache_001"
 
 
 def test_unknown_tool_and_method_errors(demo_root: Path) -> None:

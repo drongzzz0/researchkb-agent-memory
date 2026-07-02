@@ -22,7 +22,7 @@ import rk_health
 from rk_query import QueryEngine
 
 PROTOCOL_VERSION = "2025-03-26"
-SERVER_INFO = {"name": "researchkb-agent-memory", "version": "0.2.0"}
+SERVER_INFO = {"name": "researchkb-agent-memory", "version": "0.2.1"}
 INSTRUCTIONS = (
     "Query local ResearchKB evidence before troubleshooting, planning, or novelty checks. "
     "Every result carries source_type, source_id, locator, snippet, and confidence; cite these "
@@ -57,6 +57,18 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_claims",
         "description": "Retrieve structured claims extracted from sources, with provenance locators.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Keyword query."},
+                "limit": {"type": "integer", "default": 10},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_evidence",
+        "description": "Search evidence links and source chunks by keywords, returning provenance-ready citations.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -208,6 +220,8 @@ class McpServer:
             return engine.search_chunks(str(arguments["query"]), int(arguments.get("limit", 10)))
         if name == "search_claims":
             return engine.search_claims(str(arguments["query"]), int(arguments.get("limit", 10)))
+        if name == "search_evidence":
+            return engine.search_evidence(str(arguments["query"]), int(arguments.get("limit", 10)))
         if name == "find_failure_cases":
             return engine.find_failure_cases(str(arguments["symptom"]), int(arguments.get("limit", 10)))
         if name == "find_recent_runs":

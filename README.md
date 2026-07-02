@@ -99,8 +99,12 @@ Agents can query ResearchKB directly through a stdlib-only MCP server. It opens 
 database in read-only mode, builds an in-memory FTS5 index, and implements the tool contracts
 from [docs/agent_tool_contracts.md](docs/agent_tool_contracts.md):
 
-`search_papers`, `search_chunks`, `search_claims`, `find_failure_cases`, `find_recent_runs`,
-`compare_runs`, `get_health`.
+`search_papers`, `search_chunks`, `search_claims`, `search_evidence`, `find_failure_cases`,
+`find_recent_runs`, `compare_runs`, `get_health`.
+
+Per-surface coverage lives in [docs/tool_matrix.md](docs/tool_matrix.md); transport,
+protocol version, tested clients, and security boundary in
+[docs/mcp_compatibility.md](docs/mcp_compatibility.md).
 
 Register it in Cursor (`~/.cursor/mcp.json`) or Claude Code (`.mcp.json`):
 
@@ -133,6 +137,8 @@ not a feeling:
 1. **Retrieval quality** (CI-gated): `scripts/eval_retrieval.py` runs the gold query set in
    [evals/retrieval_eval.jsonl](evals/retrieval_eval.jsonl) and reports `recall_at_k`, `mrr`,
    `precision_at_1`, `guard_pass_rate` (false-positive guards), and `avg_latency_ms`.
+   The bundled eval set is synthetic and validates the demo workflow only; real deployments
+   should add their own `evals/*.jsonl` (see [evals/README.md](evals/README.md)).
 
 ```powershell
 python .\scripts\eval_retrieval.py --root .\.runtime\researchkb --min-recall 0.9 --min-mrr 0.75
@@ -150,6 +156,8 @@ python .\scripts\check_citations.py answer.md --root "<ResearchKBRoot>" --min-va
 ```
 
 ## How This Compares To Similar Tools
+
+This is a scope comparison, not a benchmark.
 
 | Tool | What it covers | What this kit adds |
 | --- | --- | --- |
@@ -238,8 +246,11 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- quickstart.md
 |   |-- architecture.md
 |   |-- schema_minimal.md
-|   `-- agent_tool_contracts.md
+|   |-- agent_tool_contracts.md
+|   |-- tool_matrix.md
+|   `-- mcp_compatibility.md
 |-- evals/
+|   |-- README.md
 |   `-- retrieval_eval.jsonl
 |-- schemas/
 |   `-- 6 JSON Schemas (papers, chunks, claims, evidence links, metrics, problem cases)

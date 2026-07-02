@@ -99,8 +99,11 @@ Agent 可以通过一个纯标准库实现的 MCP server 直接查询 ResearchKB
 数据库，在内存中构建 FTS5 索引，并实现 [docs/agent_tool_contracts.md](docs/agent_tool_contracts.md)
 中定义的工具契约：
 
-`search_papers`、`search_chunks`、`search_claims`、`find_failure_cases`、`find_recent_runs`、
-`compare_runs`、`get_health`。
+`search_papers`、`search_chunks`、`search_claims`、`search_evidence`、`find_failure_cases`、
+`find_recent_runs`、`compare_runs`、`get_health`。
+
+各层实现覆盖见 [docs/tool_matrix.md](docs/tool_matrix.md)；传输方式、协议版本、已验证客户端
+和安全边界见 [docs/mcp_compatibility.md](docs/mcp_compatibility.md)。
 
 在 Cursor（`~/.cursor/mcp.json`）或 Claude Code（`.mcp.json`）中注册：
 
@@ -131,6 +134,8 @@ python .\scripts\session_brief.py --root "<ResearchKBRoot>"
 1. **检索质量**（CI 强制）：`scripts/eval_retrieval.py` 跑
    [evals/retrieval_eval.jsonl](evals/retrieval_eval.jsonl) 金标查询集，报告 `recall_at_k`、
    `mrr`、`precision_at_1`、`guard_pass_rate`（防误报）和 `avg_latency_ms`。
+   内置评测集只验证 synthetic demo workflow，不代表真实文献库或真实实验库效果；
+   真实部署时应添加自己的 `evals/*.jsonl`（见 [evals/README.md](evals/README.md)）。
 
 ```powershell
 python .\scripts\eval_retrieval.py --root .\.runtime\researchkb --min-recall 0.9 --min-mrr 0.75
@@ -148,6 +153,8 @@ python .\scripts\check_citations.py answer.md --root "<ResearchKBRoot>" --min-va
 ```
 
 ## 与同类工具的区别
+
+这是范围对比，不是性能基准。
 
 | 工具 | 覆盖范围 | 本工具包的差异 |
 | --- | --- | --- |
@@ -235,8 +242,11 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- quickstart.md
 |   |-- architecture.md
 |   |-- schema_minimal.md
-|   `-- agent_tool_contracts.md
+|   |-- agent_tool_contracts.md
+|   |-- tool_matrix.md
+|   `-- mcp_compatibility.md
 |-- evals/
+|   |-- README.md
 |   `-- retrieval_eval.jsonl
 |-- schemas/
 |   `-- 6 个 JSON Schema（papers、chunks、claims、evidence links、metrics、problem cases）
