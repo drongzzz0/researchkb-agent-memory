@@ -126,6 +126,16 @@ def test_end_to_end_workflow(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     assert code == 0
     assert json.loads(out)["would_update"] == 1
 
+    code, out = run_cli(
+        capsys,
+        "import-bibtex",
+        str(REPO_ROOT / "examples" / "paper-memory" / "demo.bib"),
+        "--root",
+        str(root),
+    )
+    assert code == 0
+    assert json.loads(out)["would_insert"] == 2
+
 
 def test_find_failure_cases_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     root = tmp_path / "researchkb"

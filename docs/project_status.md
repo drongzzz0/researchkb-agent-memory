@@ -55,12 +55,15 @@ Everything runs on SQLite plus the Python standard library; private data never e
 - CI matrix (ubuntu/windows x Python 3.10/3.13) installs the package and smoke-tests the
   CLI on every job.
 
-### Unreleased after v0.3.0: first explicit importer
+### Unreleased after v0.3.0: first explicit importers
 
 - `rk-memory import-runs` previews and imports standardized `run_record.json` files into
   `experiment_runs`.
-- The command is dry-run by default; database writes require explicit `--write` and upsert
-  by `run_id`.
+- `rk-memory import-bibtex` previews and imports BibTeX / Zotero paper metadata into
+  `papers`.
+- Both commands are dry-run by default; database writes require explicit `--write`.
+- Run imports upsert by `run_id`; BibTeX imports upsert by stable DOI, arXiv, or BibTeX-key
+  derived `paper_id`.
 - The MCP server remains read-only.
 
 ## Current Quality Numbers
@@ -69,7 +72,7 @@ All measured on the synthetic demo database (see caveat below):
 
 | Metric | Value |
 | --- | --- |
-| Tests | 66 passing locally; CI matrix pending for the unreleased importer |
+| Tests | 71 passing locally; CI matrix pending for the unreleased importers |
 | Retrieval eval | recall@k 1.0, MRR 0.96, precision@1 0.92, guard pass rate 1.0 |
 | Citation validity (good-answer example) | 1.0 |
 | Demo library health | level `smoke`, metrics coverage 1.0, evidence density 1.0 |
@@ -85,16 +88,17 @@ benchmark exists yet; producing one is the goal of the v0.6 milestone.
 - Keyword search only (FTS5 BM25 with LIKE fallback); no semantic/embedding layer by design
   for now.
 - The package installs locally but is not yet published to PyPI.
-- Paper and note ingestion into SQLite is still planned. Experiment-run ingestion now has
-  an explicit CLI path, but it requires an existing private database and `--write`.
+- Paper metadata and experiment-run ingestion now have explicit CLI paths, but both require
+  an existing private database and `--write`.
+- Full paper/PDF parsing and note ingestion are still planned.
 
 ## Plan
 
 ### v0.4.0 - real data importers (next up)
 
 - `rk-memory import-runs`: shipped in unreleased form; keep hardening real-project tests.
-- `rk-memory import-bibtex`: seed `papers` from BibTeX / Zotero exports (metadata only,
-  no PDFs).
+- `rk-memory import-bibtex`: shipped in unreleased form; seed `papers` from BibTeX / Zotero
+  exports (metadata only, no PDFs).
 - `rk-memory import-notes`: turn curated Markdown notes into `chunks` / `claims` /
   `evidence_links`.
 - `rk-memory schema check | init --dry-run`: explicit, opt-in schema management.
@@ -135,6 +139,7 @@ rk-memory init
 rk-memory standardize-run .runtime/example-project/runs/smoke-test
 rk-memory seed-demo --include-run .runtime/example-project/runs/smoke-test/run_record.json
 rk-memory import-runs .runtime/example-project/runs --root .runtime/researchkb
+rk-memory import-bibtex examples/paper-memory/demo.bib --root .runtime/researchkb
 rk-memory eval --root .runtime/researchkb --min-recall 0.9 --min-mrr 0.75
 rk-memory check-citations examples/agent-answers/good_troubleshooting_answer.md --root .runtime/researchkb --min-validity 1.0
 python -m pytest -q

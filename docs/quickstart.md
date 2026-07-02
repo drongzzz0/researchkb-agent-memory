@@ -140,6 +140,20 @@ Then write explicitly:
 rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>" --write
 ```
 
+To import paper metadata from a BibTeX or Zotero export, preview first:
+
+```powershell
+rk-memory import-bibtex ".\examples\paper-memory\demo.bib" --root ".\.runtime\researchkb"
+```
+
+Then write explicitly against your private ResearchKB database:
+
+```powershell
+rk-memory import-bibtex "<ZoteroExport.bib>" --root "<ResearchKBRoot>" --write
+```
+
+This imports metadata only. It does not copy PDFs and rejects local `file://` URLs.
+
 ## 5. Connect An Agent Via MCP
 
 Register the read-only MCP server in Cursor (`~/.cursor/mcp.json`) or Claude Code (`.mcp.json`):

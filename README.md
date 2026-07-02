@@ -60,8 +60,8 @@ rk-memory latest-runs --root .runtime/researchkb
 rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
-Run `rk-memory --help` for the full command list (run import, search, failure cases,
-run comparison, eval, citation check, session brief, MCP server).
+Run `rk-memory --help` for the full command list (run import, BibTeX metadata import,
+search, failure cases, run comparison, eval, citation check, session brief, MCP server).
 
 Prefer not to install? Every command also works as a plain script, e.g.
 `python scripts/init_researchkb_workspace.py`, `python scripts/standardize_run.py <run-dir>`,
@@ -92,6 +92,16 @@ then write explicitly:
 rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>"
 rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>" --write
 ```
+
+To import paper metadata from a BibTeX or Zotero export, use the same preview-first pattern:
+
+```powershell
+rk-memory import-bibtex ".\examples\paper-memory\demo.bib" --root ".\.runtime\researchkb"
+rk-memory import-bibtex "<ZoteroExport.bib>" --root "<ResearchKBRoot>" --write
+```
+
+The BibTeX importer writes metadata only (`title`, `authors`, `year`, `venue`, `doi`,
+`arxiv_id`, `url`, `tags`). It does not copy PDFs or accept local `file://` URLs.
 
 See [docs/quickstart.md](docs/quickstart.md) for the full 10-minute loop.
 
@@ -288,6 +298,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- eval_retrieval.py
 |   |-- init_researchkb_workspace.py
 |   |-- import_runs.py
+|   |-- import_bibtex.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
@@ -316,6 +327,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/seed_demo_db.py`: creates a fully synthetic demo SQLite database under `.runtime/researchkb` and can include a generated `run_record.json`.
 - `scripts/query_demo.py`: queries the synthetic demo DB.
 - `scripts/import_runs.py`: dry-run-first importer for `run_record.json` files; writes require explicit `--write`.
+- `scripts/import_bibtex.py`: dry-run-first importer for BibTeX/Zotero paper metadata; writes require explicit `--write` and never copy PDFs.
 - `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`, and scaffolds a `problem_case.draft.json` for failed runs.
 - `scripts/auto_standardize_runs.py`: scans watched paths and incrementally writes missing or stale `run_record.json` files.
 - `scripts/session_brief.py`: compact session-start brief with recent runs, open failure cases, and effectiveness metrics.
@@ -331,7 +343,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - [examples/smoke-run](examples/smoke-run): minimal `metrics.json` and `summary.json` for the first ingestion test.
 - [examples/standardized-run](examples/standardized-run): synthetic normalized `run_record.json` output.
 - [examples/failure-case](examples/failure-case): a synthetic reusable failure case.
-- [examples/paper-memory](examples/paper-memory): paper, chunk, claim, and evidence-link records.
+- [examples/paper-memory](examples/paper-memory): paper, chunk, claim, evidence-link records, and a synthetic BibTeX export.
 - [examples/agent-answers](examples/agent-answers): good vs bad troubleshooting answers.
 
 ## Design Docs

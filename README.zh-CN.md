@@ -60,8 +60,8 @@ rk-memory latest-runs --root .runtime/researchkb
 rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
-`rk-memory --help` 可以看到全部命令（run 导入、检索、失败案例、运行对比、评测、
-引用校验、会话简报、MCP server）。
+`rk-memory --help` 可以看到全部命令（run 导入、BibTeX 元数据导入、检索、失败案例、
+运行对比、评测、引用校验、会话简报、MCP server）。
 
 不想安装的话，所有功能仍可用脚本方式运行，例如
 `python scripts/init_researchkb_workspace.py`、`python scripts/standardize_run.py <run-dir>`、
@@ -91,6 +91,16 @@ rk-memory init --root "<ResearchKBRoot>" --project-root "<ProjectRoot>"
 rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>"
 rk-memory import-runs "<ProjectRoot>\runs" --root "<ResearchKBRoot>" --write
 ```
+
+如果要从 BibTeX 或 Zotero 导出导入论文元数据，也先预览，再显式写入：
+
+```powershell
+rk-memory import-bibtex ".\examples\paper-memory\demo.bib" --root ".\.runtime\researchkb"
+rk-memory import-bibtex "<ZoteroExport.bib>" --root "<ResearchKBRoot>" --write
+```
+
+BibTeX importer 只写论文元数据（`title`、`authors`、`year`、`venue`、`doi`、
+`arxiv_id`、`url`、`tags`），不复制 PDF，也不接受本机 `file://` URL。
 
 完整 10 分钟闭环见 [docs/quickstart.md](docs/quickstart.md)。
 
@@ -283,6 +293,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- eval_retrieval.py
 |   |-- init_researchkb_workspace.py
 |   |-- import_runs.py
+|   |-- import_bibtex.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
@@ -311,6 +322,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `scripts/seed_demo_db.py`: 在 `.runtime/researchkb` 下创建完全 synthetic 的 demo SQLite 数据库，也可以 include 生成出的 `run_record.json`。
 - `scripts/query_demo.py`: 查询 synthetic demo DB。
 - `scripts/import_runs.py`: dry-run 优先的 `run_record.json` 导入器；只有显式 `--write` 才写库。
+- `scripts/import_bibtex.py`: dry-run 优先的 BibTeX/Zotero 论文元数据导入器；只有显式 `--write` 才写库，且不会复制 PDF。
 - `scripts/standardize_run.py`: 把混合实验输出和 `METRIC key=value` 日志转换成 `run_record.json`，失败 run 自动生成 `problem_case.draft.json` 草稿。
 - `scripts/auto_standardize_runs.py`: 扫描 watched paths，增量生成缺失或过期的 `run_record.json`。
 - `scripts/session_brief.py`: 会话开始简报，含最近 runs、未解决失败案例和有效性指标。
@@ -326,7 +338,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - [examples/smoke-run](examples/smoke-run): 第一次入库测试用的最小 `metrics.json` 和 `summary.json`。
 - [examples/standardized-run](examples/standardized-run): synthetic 标准化 `run_record.json` 输出。
 - [examples/failure-case](examples/failure-case): 虚构的可复用失败案例。
-- [examples/paper-memory](examples/paper-memory): paper、chunk、claim、evidence-link 记录示例。
+- [examples/paper-memory](examples/paper-memory): paper、chunk、claim、evidence-link 记录示例，以及 synthetic BibTeX 导出。
 - [examples/agent-answers](examples/agent-answers): 好的和坏的 troubleshooting answer 对比。
 
 ## 核心设计文档
