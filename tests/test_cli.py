@@ -136,6 +136,16 @@ def test_end_to_end_workflow(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     assert code == 0
     assert json.loads(out)["would_insert"] == 2
 
+    code, out = run_cli(
+        capsys,
+        "import-notes",
+        str(REPO_ROOT / "examples" / "note-memory" / "synthetic-cache-note.md"),
+        "--root",
+        str(root),
+    )
+    assert code == 0
+    assert json.loads(out)["would_insert"]["chunks"] == 1
+
 
 def test_find_failure_cases_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     root = tmp_path / "researchkb"

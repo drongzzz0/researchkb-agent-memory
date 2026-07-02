@@ -61,7 +61,8 @@ rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
 Run `rk-memory --help` for the full command list (run import, BibTeX metadata import,
-search, failure cases, run comparison, eval, citation check, session brief, MCP server).
+Markdown note import, search, failure cases, run comparison, eval, citation check,
+session brief, MCP server).
 
 Prefer not to install? Every command also works as a plain script, e.g.
 `python scripts/init_researchkb_workspace.py`, `python scripts/standardize_run.py <run-dir>`,
@@ -102,6 +103,17 @@ rk-memory import-bibtex "<ZoteroExport.bib>" --root "<ResearchKBRoot>" --write
 
 The BibTeX importer writes metadata only (`title`, `authors`, `year`, `venue`, `doi`,
 `arxiv_id`, `url`, `tags`). It does not copy PDFs or accept local `file://` URLs.
+
+To import curated Markdown or Obsidian notes as searchable evidence, preview first:
+
+```powershell
+rk-memory import-notes ".\examples\note-memory\synthetic-cache-note.md" --root ".\.runtime\researchkb"
+rk-memory import-notes "<NotesFolder>" --root "<ResearchKBRoot>" --write
+```
+
+The note importer writes one `chunk` per note, a note-level `evidence_link`, and optional
+`claims` from frontmatter or body markers such as `[claim:safety] ...`. It rejects local
+absolute locators and does not copy PDFs or raw experiment logs.
 
 See [docs/quickstart.md](docs/quickstart.md) for the full 10-minute loop.
 
@@ -275,6 +287,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- standardized-run/
 |   |-- failure-case/
 |   |-- paper-memory/
+|   |-- note-memory/
 |   `-- agent-answers/
 |-- launchers/
 |   `-- Claude Code launcher templates
@@ -299,6 +312,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 |   |-- init_researchkb_workspace.py
 |   |-- import_runs.py
 |   |-- import_bibtex.py
+|   |-- import_notes.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
@@ -328,6 +342,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - `scripts/query_demo.py`: queries the synthetic demo DB.
 - `scripts/import_runs.py`: dry-run-first importer for `run_record.json` files; writes require explicit `--write`.
 - `scripts/import_bibtex.py`: dry-run-first importer for BibTeX/Zotero paper metadata; writes require explicit `--write` and never copy PDFs.
+- `scripts/import_notes.py`: dry-run-first importer for curated Markdown notes; writes chunks, claims, and evidence links only with explicit `--write`.
 - `scripts/standardize_run.py`: converts mixed experiment outputs and `METRIC key=value` logs into `run_record.json`, and scaffolds a `problem_case.draft.json` for failed runs.
 - `scripts/auto_standardize_runs.py`: scans watched paths and incrementally writes missing or stale `run_record.json` files.
 - `scripts/session_brief.py`: compact session-start brief with recent runs, open failure cases, and effectiveness metrics.
@@ -344,6 +359,7 @@ For KV-cache reuse work, see [researchkb/contracts/kv_cache_reuse_metrics_contra
 - [examples/standardized-run](examples/standardized-run): synthetic normalized `run_record.json` output.
 - [examples/failure-case](examples/failure-case): a synthetic reusable failure case.
 - [examples/paper-memory](examples/paper-memory): paper, chunk, claim, evidence-link records, and a synthetic BibTeX export.
+- [examples/note-memory](examples/note-memory): a synthetic Markdown reading note with frontmatter and claim markers.
 - [examples/agent-answers](examples/agent-answers): good vs bad troubleshooting answers.
 
 ## Design Docs

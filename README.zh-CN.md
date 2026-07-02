@@ -60,8 +60,8 @@ rk-memory latest-runs --root .runtime/researchkb
 rk-memory search-evidence "validate compatibility" --root .runtime/researchkb
 ```
 
-`rk-memory --help` 可以看到全部命令（run 导入、BibTeX 元数据导入、检索、失败案例、
-运行对比、评测、引用校验、会话简报、MCP server）。
+`rk-memory --help` 可以看到全部命令（run 导入、BibTeX 元数据导入、Markdown 笔记导入、
+检索、失败案例、运行对比、评测、引用校验、会话简报、MCP server）。
 
 不想安装的话，所有功能仍可用脚本方式运行，例如
 `python scripts/init_researchkb_workspace.py`、`python scripts/standardize_run.py <run-dir>`、
@@ -101,6 +101,17 @@ rk-memory import-bibtex "<ZoteroExport.bib>" --root "<ResearchKBRoot>" --write
 
 BibTeX importer 只写论文元数据（`title`、`authors`、`year`、`venue`、`doi`、
 `arxiv_id`、`url`、`tags`），不复制 PDF，也不接受本机 `file://` URL。
+
+如果要把整理过的 Markdown 或 Obsidian 笔记导成可检索证据，也先预览：
+
+```powershell
+rk-memory import-notes ".\examples\note-memory\synthetic-cache-note.md" --root ".\.runtime\researchkb"
+rk-memory import-notes "<NotesFolder>" --root "<ResearchKBRoot>" --write
+```
+
+note importer 每个笔记写入一个 `chunk`、一条 note-level `evidence_link`，并从 frontmatter
+或正文 `[claim:safety] ...` 标记里可选生成 `claims`。它会拒绝本机绝对 locator，不复制 PDF
+或原始实验日志。
 
 完整 10 分钟闭环见 [docs/quickstart.md](docs/quickstart.md)。
 
@@ -270,6 +281,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- standardized-run/
 |   |-- failure-case/
 |   |-- paper-memory/
+|   |-- note-memory/
 |   `-- agent-answers/
 |-- launchers/
 |   `-- Claude Code launcher templates
@@ -294,6 +306,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 |   |-- init_researchkb_workspace.py
 |   |-- import_runs.py
 |   |-- import_bibtex.py
+|   |-- import_notes.py
 |   |-- public_repo_scan.py
 |   |-- query_demo.py
 |   |-- seed_demo_db.py
@@ -323,6 +336,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - `scripts/query_demo.py`: 查询 synthetic demo DB。
 - `scripts/import_runs.py`: dry-run 优先的 `run_record.json` 导入器；只有显式 `--write` 才写库。
 - `scripts/import_bibtex.py`: dry-run 优先的 BibTeX/Zotero 论文元数据导入器；只有显式 `--write` 才写库，且不会复制 PDF。
+- `scripts/import_notes.py`: dry-run 优先的 curated Markdown 笔记导入器；只有显式 `--write` 才写入 chunks、claims 和 evidence links。
 - `scripts/standardize_run.py`: 把混合实验输出和 `METRIC key=value` 日志转换成 `run_record.json`，失败 run 自动生成 `problem_case.draft.json` 草稿。
 - `scripts/auto_standardize_runs.py`: 扫描 watched paths，增量生成缺失或过期的 `run_record.json`。
 - `scripts/session_brief.py`: 会话开始简报，含最近 runs、未解决失败案例和有效性指标。
@@ -339,6 +353,7 @@ KV-cache reuse 相关实验见 [researchkb/contracts/kv_cache_reuse_metrics_cont
 - [examples/standardized-run](examples/standardized-run): synthetic 标准化 `run_record.json` 输出。
 - [examples/failure-case](examples/failure-case): 虚构的可复用失败案例。
 - [examples/paper-memory](examples/paper-memory): paper、chunk、claim、evidence-link 记录示例，以及 synthetic BibTeX 导出。
+- [examples/note-memory](examples/note-memory): 带 frontmatter 和 claim 标记的 synthetic Markdown 阅读笔记。
 - [examples/agent-answers](examples/agent-answers): 好的和坏的 troubleshooting answer 对比。
 
 ## 核心设计文档

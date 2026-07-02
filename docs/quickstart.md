@@ -154,6 +154,22 @@ rk-memory import-bibtex "<ZoteroExport.bib>" --root "<ResearchKBRoot>" --write
 
 This imports metadata only. It does not copy PDFs and rejects local `file://` URLs.
 
+To import curated Markdown or Obsidian notes, preview first:
+
+```powershell
+rk-memory import-notes ".\examples\note-memory\synthetic-cache-note.md" --root ".\.runtime\researchkb"
+```
+
+Then write explicitly against your private ResearchKB database:
+
+```powershell
+rk-memory import-notes "<NotesFolder>" --root "<ResearchKBRoot>" --write
+```
+
+The importer writes one `chunk` per note, a note-level `evidence_link`, and optional
+`claims` from frontmatter or body markers such as `[claim:safety] ...`. It does not copy
+PDFs or raw experiment logs.
+
 ## 5. Connect An Agent Via MCP
 
 Register the read-only MCP server in Cursor (`~/.cursor/mcp.json`) or Claude Code (`.mcp.json`):
