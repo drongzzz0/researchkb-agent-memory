@@ -11,8 +11,8 @@ The goal is not to configure a full literature database on day one. The goal is 
 ## 1. Clone
 
 ```powershell
-git clone https://github.com/drongzzz0/obsidian.git
-cd obsidian
+git clone https://github.com/drongzzz0/researchkb-agent-memory.git
+cd researchkb-agent-memory
 ```
 
 ## 2. Create A Smoke Workspace

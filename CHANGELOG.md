@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.2.0 - 2026-07-02
 
+- Renamed the repository from `obsidian` to `researchkb-agent-memory`; old GitHub URLs redirect automatically.
 - Added `researchkb/rk_mcp_server.py`: a stdlib-only read-only MCP server implementing the agent tool contracts (papers, chunks, claims, failure cases, runs, comparisons, health).
 - Added `researchkb/rk_query.py`: shared read-only query engine with in-memory FTS5 indexing, LIKE fallback, and provenance-shaped results.
 - Added quantified effectiveness metrics: retrieval eval gold set (`evals/retrieval_eval.jsonl` + `scripts/eval_retrieval.py` with recall@k, MRR, precision@1, guard pass rate), library health effectiveness (`failure_documentation_rate`, `open_failure_cases`, `evidence_density`, `run_freshness_days`), and citation validity audit (`scripts/check_citations.py`).

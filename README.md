@@ -1,6 +1,6 @@
 # ResearchKB Agent Memory
 
-[![CI](https://github.com/drongzzz0/obsidian/actions/workflows/ci.yml/badge.svg)](https://github.com/drongzzz0/obsidian/actions/workflows/ci.yml)
+[![CI](https://github.com/drongzzz0/researchkb-agent-memory/actions/workflows/ci.yml/badge.svg)](https://github.com/drongzzz0/researchkb-agent-memory/actions/workflows/ci.yml)
 
 English | [简体中文](README.zh-CN.md)
 
@@ -48,8 +48,8 @@ The actual database, PDFs, logs, secrets, and machine-specific config stay outsi
 ### PowerShell
 
 ```powershell
-git clone https://github.com/drongzzz0/obsidian.git
-cd obsidian
+git clone https://github.com/drongzzz0/researchkb-agent-memory.git
+cd researchkb-agent-memory
 ```
 
 Create a synthetic demo database and query it:
@@ -65,8 +65,8 @@ python .\scripts\query_demo.py --root .\.runtime\researchkb latest-runs
 ### Bash
 
 ```bash
-git clone https://github.com/drongzzz0/obsidian.git
-cd obsidian
+git clone https://github.com/drongzzz0/researchkb-agent-memory.git
+cd researchkb-agent-memory
 python scripts/init_researchkb_workspace.py
 python scripts/standardize_run.py .runtime/example-project/runs/smoke-test
 python scripts/seed_demo_db.py --include-run .runtime/example-project/runs/smoke-test/run_record.json
